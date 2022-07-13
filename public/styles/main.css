@@ -1,12 +1,23 @@
 body {
-    background: #DDDDDD;
+    background: #083156;
 }
 
 .navbar {
-    background-color: #800000;
+    background-color: black;
     color: white;
+    width: 100%;
 }
 
 .page-container {
     margin-top: 75px;
+}
+
+button{
+    background-color: aqua;
+    height: 10000;
+}
+
+p{
+    color:white;
+    font-size: 111pt;
 }
