@@ -5,16 +5,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="styles/main.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@500&display=swap');
+    </style>
   <title>App Name</title>
 </head>
 
 <body>
-  <nav></nav>
-  <div id="mainPage" class="container page-container">
-    
-    <p>WORKOUT TRACKER</p>
+  <nav>
+    <div>Title</div>
+    <div id="usernameNav">Username</div>
+  </nav>
+  <div id="info">
+    <p id="infoWelcome">Welcome Username</p>
+    <p id="infoCompleted">you have completed <h1>4</h1> workouts in the past <h1>7</h1> days</p>
+    <p id="infoSpent">and have spent <h1>25</h1> hours in the gym in the last <h1>30</h1> days.</p>
+  </div>
+  <div id="cal">
 
   </div>
+  <div id="but">
+    <button id="viewStats">View Full Stats</button>
+    <button id="viewArchive">Workout Archive</button>
+    <button id="logWorkout">Log/Create New Workout</button>
+  </div>
+
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
   <script src="/__/firebase/7.18.0/firebase-app.js"></script>

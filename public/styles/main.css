@@ -1,15 +1,62 @@
 body {
     background: #083156;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-areas: 
+    "nav nav"
+    "info info"
+    "cal but";
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 1fr 4fr 5fr;
+    height: 100vh;
 }
 
-.navbar {
+nav {
+    grid-area: nav;
     background-color: black;
     color: white;
     width: 100%;
+    font-size: 30pt;
+    line-height: 1.7;
+    font-family: 'Work Sans', sans-serif;
 }
 
-.page-container {
-    margin-top: 75px;
+nav > div{
+    display: inline;
+    margin: 12px;
+}
+
+#info{
+    font-family: 'Work Sans', sans-serif;
+    color: white;
+    grid-area: info;
+    font-size: 30pt;
+    padding: 15px 50px;
+}
+
+#info > p{
+    margin: 10px 0;
+    /* display: inline; */
+}
+
+#infoWelcome{
+    font-size: 50pt;
+    padding-left:20px;
+}
+
+#infoCompleted{
+    padding-left:120px;
+    display: inline;
+}
+
+#infoSpent{
+    padding-left:270px;
+    display: inline;
+}
+
+#usernameNav{
+    margin-left: 1140px;
 }
 
 button{
@@ -17,7 +64,18 @@ button{
     height: 10000;
 }
 
-p{
-    color:white;
-    font-size: 111pt;
+h1{
+    display: inline;
+    font-size: 40pt;
+
+}
+
+#cal{
+    grid-area: cal;
+    background-color: blueviolet;
+}
+
+#but{
+    grid-area: but;
+    text-align: center;
 }
