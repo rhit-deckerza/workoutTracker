@@ -69,6 +69,8 @@ h1{
 #cal{
     grid-area: cal;
     background-color: blueviolet;
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
 
 #but{
