@@ -12,13 +12,13 @@ function weekDay(id, weekDay, date){
                 </span>
             </span>
         );
-        }
+}
 
 function header(username){
     return (
         <header>
             <div>Title</div>
-            <div id="usernameHeader">{username}</div>
+            <div>{username}<img id="userImg" src="\images\AustinLiao.jpg"></img></div>
         </header>
     );
 }
@@ -33,10 +33,10 @@ function buttons(){
     );
 }
 
-function info (days, hours){
+function info (username, days, hours){
     return (
         <div id="info">
-            <p id="infoWelcome">Welcome Username</p>
+            <p id="infoWelcome">Welcome {username}</p>
             <p id="infoCompleted">you have completed <h1>{days}</h1> workouts in the past <h1>7</h1> days</p>
             <p id="infoSpent">and have spent <h1>{hours}</h1> hours in the gym in the last <h1>30</h1> days.</p>
         </div>
@@ -108,8 +108,8 @@ class HomePage extends React.Component{
     render(){
         return(
             <div>
-                {header("Username")}
-                {info("100", "130")}
+                {header("AustinLiao")}
+                {info("AustinLiao", "100", "130")}
                 {buttons()}
                 <Cal></Cal> 
             </div>
