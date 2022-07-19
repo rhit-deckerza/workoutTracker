@@ -1,4 +1,8 @@
-body {
+bodY{
+    margin: 0;
+}
+
+root > div{
     background: #083156;
     margin: 0;
     padding: 0;
@@ -32,7 +36,7 @@ header > div{
     color: white;
     grid-area: info;
     font-size: 30pt;
-    padding: 15px 50px;
+    padding: 15px 30px;
 }
 
 #info > p{
@@ -46,16 +50,19 @@ header > div{
 }
 
 #infoCompleted{
-    padding-left:120px;
-    display: inline;
+    padding-left:130px;
+    display: block;
+    font-size: 30pt;
+    white-space: nowrap
 }
 
 #infoSpent{
     padding-left:270px;
     display: inline;
+    font-size: 30pt;
 }
 
-#usernameNav{
+#usernameHeader{
     margin-left: 1140px;
 }
 
@@ -71,11 +78,14 @@ h1{
     background-color: black;
     margin-left: 20px;
     margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
 }
 
 #but{
     grid-area: but;
     text-align: center;
+    padding-bottom: 15pt;
 }
 
 button{
@@ -106,8 +116,11 @@ button{
     width: 13.98%;
     background-color: #B1E1FF;
     text-align:center;
+    
+    
 }
 #cal > span > span{
+    display: block;
     font-family: 'Work Sans', sans-serif;
     font-size: 17pt;
     font-weight: bold;
