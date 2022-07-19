@@ -12,7 +12,7 @@ body {
     height: 100vh;
 }
 
-nav {
+header {
     grid-area: nav;
     background-color: black;
     color: white;
@@ -22,7 +22,7 @@ nav {
     font-family: 'Work Sans', sans-serif;
 }
 
-nav > div{
+header > div{
     display: inline;
     margin: 12px;
 }
@@ -68,7 +68,7 @@ h1{
 
 #cal{
     grid-area: cal;
-    background-color: blueviolet;
+    background-color: black;
     margin-left: 20px;
     margin-bottom: 20px;
 }
@@ -85,4 +85,37 @@ button{
     padding: 10px 30px;
     margin: 10px;
     font-size: 15pt;
+}
+
+#viewStats{
+    background-color: #B1E1FF;
+} 
+
+#viewArchive{
+    background-color: #4DBAFF;
+}
+
+#logWorkout{
+    background-color: #1B8EF2;
+}
+
+#cal > span{
+    vertical-align:top;
+    display: inline-block;
+    height: 100%;
+    width: 13.98%;
+    background-color: #B1E1FF;
+    text-align:center;
+}
+#cal > span > span{
+    font-family: 'Work Sans', sans-serif;
+    font-size: 17pt;
+    font-weight: bold;
+}
+
+.myLine{
+    display: inline-block;
+    width: 100%;
+    height: 3pt;
+    background-color: black;
 }
