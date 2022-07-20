@@ -17,8 +17,8 @@ function weekDay(id, weekDay, date){
 function header(username){
     return (
         <header>
-            <div>Title</div>
-            <div>{username}<img id="userImg" src="\images\AustinLiao.jpg"></img></div>
+            <div id="title">Title</div>
+            <div id="usernameImgContainer">{username}<img id="userImg" src="\images\AustinLiao.jpg"></img></div>
         </header>
     );
 }
@@ -86,7 +86,6 @@ class Cal extends React.Component{
     }
 
     render(){
-        console.log(this.calDay(6));
         return(<div id="cal">
             {weekDay("oneCal", this.weekDays[this.calDay(6)], this.calDate(6))}
             {weekDay("twoCal", this.weekDays[this.calDay(5)],this.calDate(5))}
@@ -104,7 +103,6 @@ class HomePage extends React.Component{
     constructor(props){
         super(props)
     }
-
     render(){
         return(
             <div>
@@ -116,6 +114,9 @@ class HomePage extends React.Component{
         )
     }
 }
+
+
+
 
 const root = ReactDOM.createRoot(
     document.querySelector("root"));

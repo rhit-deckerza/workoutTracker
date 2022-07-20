@@ -1,5 +1,12 @@
+
+
 body{
     margin: 0;
+    background: #083156;
+    overflow: hidden;
+}
+root{
+    background: #083156;
 }
 
 root > div{
@@ -12,7 +19,7 @@ root > div{
     "info info"
     "cal but";
     grid-template-columns: 3fr 1fr;
-    grid-template-rows: 1fr 4fr 5fr;
+    grid-template-rows: .5fr 4fr 5fr;
     height: 100vh;
 }
 
@@ -21,7 +28,7 @@ header {
     background-color: black;
     color: white;
     width: 100%;
-    font-size: 30pt;
+    font-size: 25pt;
     line-height: 1.7;
     font-family: 'Work Sans', sans-serif;
     display: flex;
@@ -30,7 +37,17 @@ header {
 
 header > div{
     display: inline;
-    margin: 12px;
+}
+
+#title{
+    margin-left: 10px;
+}
+
+#usernameImgContainer{
+    margin-right: 10px;
+    display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #info{
@@ -51,21 +68,25 @@ header > div{
     padding-left:20px;
     white-space: nowrap;
     overflow: hidden;
-  text-overflow: ellipsis;
-    
+    text-overflow: ellipsis;
 }
 
 #infoCompleted{
     padding-left:130px;
     display: block;
     font-size: 30pt;
-    white-space: nowrap
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 #infoSpent{
     padding-left:270px;
-    display: inline;
+    display: block;
     font-size: 30pt;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 
@@ -138,7 +159,7 @@ button{
 }
 
 #userImg{
-    display: inline-block;
-    height: 50px;
+    height: 40px;
     border-radius: 50%;
+    margin-left: 10px;
 }
