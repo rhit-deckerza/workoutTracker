@@ -1,3 +1,5 @@
+
+
 function weekDay(id, weekDay, date){
         return (
             <span id={id}>
@@ -14,11 +16,11 @@ function weekDay(id, weekDay, date){
         );
 }
 
-function header(username){
+function header(username, logOutFunction){
     return (
         <header>
             <div id="title">Title</div>
-            <div id="usernameImgContainer">{username}<img id="userImg" src="\images\AustinLiao.jpg"></img></div>
+            <div id="usernameImgContainer">{username}<img id="userImg" src="\images\AustinLiao.jpg" onClick={logOutFunction}></img></div>
         </header>
     );
 }
@@ -70,18 +72,24 @@ class Cal extends React.Component{
             }
         }
         let dateString = date.toString();
-        if (date.toString().slice(-1) < 4 && date != 11 && date != 12 && date != 13){
+        if (dateString.slice(-1) < 4 && date != 11 && date != 12 && date != 13){
             switch(date.toString().slice(-1)){
-                case "1":
-                    dateString = dateString + "st";
-                case "2":
-                    dateString = dateString + "nd";
-                case "3":
-                    dateString = dateString + "rd";
+                case '0':
+                    dateString = dateString + 'th';
+                    break;
+                case '1':
+                    dateString = dateString + 'st';
+                    break;
+                case '2':
+                    dateString = dateString + 'nd';
+                    break;
+                case '3':
+                    dateString = dateString + 'rd';
+                    break;
             }
             return dateString;
         }else{
-            return dateString + "th"
+            return dateString + 'th'
         }
     }
 
@@ -99,14 +107,26 @@ class Cal extends React.Component{
 
 }
 
+
 class HomePage extends React.Component{
     constructor(props){
         super(props)
     }
+
+    logout(){
+        firebase.auth().signOut().then(function () {
+            // Sign-out successful.
+            console.log("Sign Out Successful");
+        }).catch(function(error){
+            // An error happened.
+            console.log("Sign Out Error");
+        });
+    }
+
     render(){
         return(
             <div>
-                {header("AustinLiao")}
+                {header("AustinLiao", this.logout)}
                 {info("AustinLiao", "100", "130")}
                 {buttons()}
                 <Cal></Cal> 
@@ -115,9 +135,52 @@ class HomePage extends React.Component{
     }
 }
 
+function startFirebaseUI() {
+	const uiConfig = {
+        signInSuccessUrl: '/',
+		signInOptions: [
+			firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+			firebase.auth.EmailAuthProvider.PROVIDER_ID,
+			firebase.auth.PhoneAuthProvider.PROVIDER_ID
+		],
+	};
+    const ui = new firebaseui.auth.AuthUI(firebase.auth())
+    ui.start('#firebaseui-auth-container', uiConfig)
+}
 
+function redirect(){
+    switch(localStorage.getItem("page")){
+        case "0":
+            root.render();
+            startFirebaseUI();
+            break;
+        case "1":
+            root.render(<HomePage></HomePage>);
+            break;
+    }
+}
 
+function main(){
+    localStorage.setItem("page", "0");
+    firebase.auth().onAuthStateChanged( (user) => {
+		if (user) {
+			// User is signed in.
+			const displayName = user.displayName;
+			const email = user.email;
+			const photoURL = user.photoURL;
+			const isAnonymous = user.isAnonymous;
+			const uid = user.uid;
+			const phoneNumber = user.phoneNumber;
+            localStorage.setItem("page", 1);
+            redirect();
+		}else{
+            localStorage.setItem("page", 0);
+            redirect();
+        }
+	});
+}
 
 const root = ReactDOM.createRoot(
     document.querySelector("root"));
-root.render(<HomePage></HomePage>);
+main();
+
