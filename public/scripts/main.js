@@ -25,13 +25,13 @@ function header(username, logOutFunction, imgRef){
     );
 }
 
-function buttons(switchFunction){
+function buttons(switchFunction, switchWords){
     return (
         <div id="but">
             <button id="viewStats">View Full Stats</button>
             <button id="viewArchive">Workout Archive</button>
             <button id="logWorkout">Log/Create New Workout</button>
-            <button onClick={switchFunction}>Aria  button</button>
+            <button id="switch" onClick={switchFunction}>{switchWords}</button>
         </div>
     );
 }
@@ -108,10 +108,40 @@ class Cal extends React.Component{
 
 }
 
+
+function notesHeader(){
+    return (
+        <div id="notesHeader">Notes</div>
+    )
+}
+
+function notesTitle(){
+    return(
+        <input id="notesTitle">
+        </input>
+    )
+}
+
+function notesText(){
+    return(
+        <textarea id="notesText">
+        </textarea>
+    )
+}
+
+class NoteSelector{
+    render(){
+        
+    }
+}
+
+
 class Notes extends React.Component{
     render(){
-        return(<div id="cal">
-            HI
+        return(<div id="notes">
+            {notesHeader()}
+            {notesTitle()}
+            {notesText()}
         </div>)
     }
 }
@@ -154,12 +184,21 @@ class HomePage extends React.Component{
         }
     }
 
+    renderButtons(){
+        if (this.state.notes == 0){
+            return (buttons(this.switch.bind(this), "Switch to Notes"))
+        }else{
+            return (buttons(this.switch.bind(this), "Switch to Calendar"))
+        }
+    }
+
     render(){
+        console.log("rerendering");
         return(
             <div>
                 {header(currUser.displayName, this.logout, currUser.photoURL)}
                 {info(currUser.displayName, "100", "130")}
-                {buttons(this.switch.bind(this))}
+                {this.renderButtons()}
                 {this.state.notesOrCal}
             </div>
         )

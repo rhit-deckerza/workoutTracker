@@ -3,7 +3,7 @@
 body{
     margin: 0;
     background: #083156;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 root{
     background: #083156;
@@ -107,6 +107,53 @@ h1{
     justify-content: space-between;
 }
 
+#notes{
+    grid-area: cal;
+    background-color: black;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-areas: 
+        "header title"
+        "select text";
+    grid-template-columns: 1fr 5fr;
+    grid-template-rows: 1fr 5fr;
+}
+
+#notesText{
+    font-family: 'Work Sans', sans-serif;
+    grid-area: text;
+    border:0;
+    padding: 0;
+    outline:0;
+    background-color: #B1E1FF;
+    resize: none;
+}
+
+#notesHeader{
+    background-color: #B1E1FF;
+    text-align: center;
+    font-family: 'Work Sans', sans-serif;
+    grid-area: header;
+    font-size: 30pt;
+    margin-right: 2.5px;
+    margin-bottom:2.5px;
+    line-height: 52px;
+}
+
+#notesTitle{
+    font-family: 'Work Sans', sans-serif;
+    grid-area: title;
+    font-size: 25pt;
+    border:0;
+    padding: 0;
+    outline:0;
+    background-color: #B1E1FF;
+    resize: none;
+    margin-bottom:2.5px;
+}
+
+
 #but{
     grid-area: but;
     text-align: center;
@@ -116,7 +163,7 @@ h1{
 button{
     font-family: 'Work Sans', sans-serif;
     border-radius: 12pt;
-    height: 70px;
+    height: 72px;
     padding: 5px 20px;
     margin: 5px 10px;
     font-size: 15pt;
@@ -162,4 +209,8 @@ button{
     height: 40px;
     border-radius: 50%;
     margin-left: 10px;
+}
+
+#switch{
+    margin-top: 30px;
 }
