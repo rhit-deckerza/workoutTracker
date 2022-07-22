@@ -1,4 +1,4 @@
-
+let currUser = null;
 
 function weekDay(id, weekDay, date){
         return (
@@ -16,21 +16,22 @@ function weekDay(id, weekDay, date){
         );
 }
 
-function header(username, logOutFunction){
+function header(username, logOutFunction, imgRef){
     return (
         <header>
             <div id="title">Title</div>
-            <div id="usernameImgContainer">{username}<img id="userImg" src="\images\AustinLiao.jpg" onClick={logOutFunction}></img></div>
+            <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef} onClick={logOutFunction}></img></div>
         </header>
     );
 }
 
-function buttons(){
+function buttons(switchFunction){
     return (
         <div id="but">
             <button id="viewStats">View Full Stats</button>
             <button id="viewArchive">Workout Archive</button>
             <button id="logWorkout">Log/Create New Workout</button>
+            <button onClick={switchFunction}>Aria  button</button>
         </div>
     );
 }
@@ -107,10 +108,22 @@ class Cal extends React.Component{
 
 }
 
+class Notes extends React.Component{
+    render(){
+        return(<div id="cal">
+            HI
+        </div>)
+    }
+}
+
 
 class HomePage extends React.Component{
     constructor(props){
-        super(props)
+        super(props)  
+        this.state = {
+            notesOrCal: <Cal></Cal>,
+            notes: 0
+        }
     }
 
     logout(){
@@ -123,13 +136,31 @@ class HomePage extends React.Component{
         });
     }
 
+    switch(){
+        if (this.state.notes == 0){
+            this.setState(
+                {
+                    notesOrCal: <Notes></Notes>,
+                    notes: 1
+                }
+            )
+        }else{
+            this.setState(
+                {
+                    notesOrCal: <Cal></Cal>,
+                    notes: 0
+                }
+            )
+        }
+    }
+
     render(){
         return(
             <div>
-                {header("AustinLiao", this.logout)}
-                {info("AustinLiao", "100", "130")}
-                {buttons()}
-                <Cal></Cal> 
+                {header(currUser.displayName, this.logout, currUser.photoURL)}
+                {info(currUser.displayName, "100", "130")}
+                {buttons(this.switch.bind(this))}
+                {this.state.notesOrCal}
             </div>
         )
     }
@@ -171,6 +202,7 @@ function main(){
 			const isAnonymous = user.isAnonymous;
 			const uid = user.uid;
 			const phoneNumber = user.phoneNumber;
+            currUser = user;
             localStorage.setItem("page", 1);
             redirect();
 		}else{

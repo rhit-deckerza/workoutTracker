@@ -116,9 +116,9 @@ h1{
 button{
     font-family: 'Work Sans', sans-serif;
     border-radius: 12pt;
-    height: 100px;
-    padding: 10px 30px;
-    margin: 10px;
+    height: 70px;
+    padding: 5px 20px;
+    margin: 5px 10px;
     font-size: 15pt;
 }
 
