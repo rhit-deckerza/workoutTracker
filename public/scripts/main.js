@@ -1,4 +1,39 @@
+
+const FB_USERS_COLLECTION_KEY = "Users"
+const FB_EXERCISES_COLLECTION_KEY = "Exercises"
+const FB_NOTES_COLLECTION_KEY = "Notes"
+
 let currUser = null;
+let User = class{
+    constructor(user){
+        this.fbUser = user;
+        this._registerInFirestore(this.fbUser.uid)
+    }
+
+    _registerInFirestore(UID){
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID)
+        ref.onSnapshot((doc) => {
+            if (!doc.exists) {
+				firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID).set({
+                    id: UID
+                });
+            }
+        });
+    }
+
+    getUsername(){
+        return this.fbUser.displayName;
+    }
+
+    getImgRef(){
+        return this.fbUser.photoURL;
+    }
+
+    getUID(){
+        return this.fbUser.uid;
+    }
+
+}
 
 function weekDay(id, weekDay, date){
         return (
@@ -115,32 +150,121 @@ function notesHeader(){
     )
 }
 
-function notesTitle(){
+function notesTitle(value, onChange){
     return(
-        <input id="notesTitle">
+        <input id="notesTitle" value={value} placeholder="Title" onChange={e => onChange(e.target.value)}>
         </input>
     )
 }
 
 function notesText(){
     return(
-        <textarea id="notesText">
+        <textarea id="notesText" placeholder="Enter notes here">
         </textarea>
     )
 }
 
-class NoteSelector{
+function noteSelection(title, timestamp){
+    return(
+        <div className="NoteSelection"><div class="NoteSelectionTitle">{title}</div><div class="NoteSelectionTimestamp">{timestamp}</div><hr></hr></div>
+    )
+}
+
+class NoteSelector extends React.Component{
     render(){
-        
+        let notes = this.props.notes;
+        const noteSelections = notes.map((note) => 
+            noteSelection(note.title, note.timestamp)
+        );
+        return(
+            <div id="NoteSelector">
+                {noteSelections}
+            </div>
+        )
     }
 }
 
 
 class Notes extends React.Component{
+    constructor(props){
+        super(props)
+        this.state = {
+            notes: [
+                {
+                    title: "",
+                    body: "",
+                    timestamp: "",
+                    id: ""
+                }
+            ],
+            currentNote: 0
+        }
+        this._pullNotes();
+    }
+
+    _updateTimestamp(){
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
+        ref.doc(this.state.notes[this.state.currentNote].id).get().then((doc) => {
+            let newNote = this.state.notes[this.state.currentNote]
+            newNote.timestamp = firebase.firestore.Timestamp.fromDate(new Date()).toDate().toString().substring(0, 24)
+            let newNotes = this.state.notes
+            newNotes[this.state.currentNote] = newNote
+            this.setState({
+                notes: newNotes,
+                currentNote: this.state.currentNote
+            })
+        })
+    }
+
+    _updateTitle(newValue){
+        let newNote = this.state.notes[this.state.currentNote]
+        newNote.title = newValue
+        let newNotes = this.state.notes
+        newNotes[this.state.currentNote] = newNote
+        this.setState({
+            notes: newNotes,
+            currentNote: this.state.currentNote
+        })
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
+        ref.doc(this.state.notes[this.state.currentNote].id).set({
+            body: this.state.notes[this.state.currentNote].body,
+            title: this.state.notes[this.state.currentNote].title,
+            timestamp: firebase.firestore.Timestamp.fromDate(new Date())
+        }).then(
+            this._updateTimestamp()
+        )
+    }
+
+    _pullNotes(){
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
+        let newNotes = []
+        ref.get().then((querySnapshot) => {
+            let i = 0;
+            querySnapshot.forEach((doc) => {
+                console.log(doc);
+                newNotes[i] = {
+                    body: doc.data().body,
+                    title: doc.data().title,
+                    timestamp:doc.data().timestamp.toDate().toString().substring(0, 24),
+                    id: doc.id
+                }
+                i = i + 1;
+            });
+            this.setState({
+                notes: newNotes
+            })
+        })
+        .catch((error) => {
+            console.log("Error getting documents: ", error);
+        });
+        console.log(newNotes)
+    }
+
     render(){
         return(<div id="notes">
             {notesHeader()}
-            {notesTitle()}
+            {notesTitle(this.state.notes[this.state.currentNote].title, this._updateTitle.bind(this))}
+            <NoteSelector notes={this.state.notes} currentNote={this.state.currentNote}></NoteSelector>
             {notesText()}
         </div>)
     }
@@ -196,8 +320,8 @@ class HomePage extends React.Component{
         console.log("rerendering");
         return(
             <div>
-                {header(currUser.displayName, this.logout, currUser.photoURL)}
-                {info(currUser.displayName, "100", "130")}
+                {header(currUser.getUsername(), this.logout, currUser.getImgRef())}
+                {info(currUser.getUsername(), "100", "130")}
                 {this.renderButtons()}
                 {this.state.notesOrCal}
             </div>
@@ -234,14 +358,7 @@ function main(){
     localStorage.setItem("page", "0");
     firebase.auth().onAuthStateChanged( (user) => {
 		if (user) {
-			// User is signed in.
-			const displayName = user.displayName;
-			const email = user.email;
-			const photoURL = user.photoURL;
-			const isAnonymous = user.isAnonymous;
-			const uid = user.uid;
-			const phoneNumber = user.phoneNumber;
-            currUser = user;
+            currUser = new User(user);
             localStorage.setItem("page", 1);
             redirect();
 		}else{
