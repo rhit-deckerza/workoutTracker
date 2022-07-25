@@ -148,12 +148,13 @@ h1{
 }
 
 .NoteSelectionTitleActive{
-    width: 160px;
     font-size: 15pt;
     color: #1B8EF2;
     white-space: nowrap;
     overflow: hidden;
+    display: flex;
     text-overflow: ellipsis;
+    justify-content: space-between;
 }
 .NoteSelectionTimestamp{
     font-size: 10pt;

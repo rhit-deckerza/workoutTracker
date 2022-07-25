@@ -1,8 +1,6 @@
-
 const FB_USERS_COLLECTION_KEY = "Users"
 const FB_EXERCISES_COLLECTION_KEY = "Exercises"
 const FB_NOTES_COLLECTION_KEY = "Notes"
-
 let currUser = null;
 let User = class{
     constructor(user){
