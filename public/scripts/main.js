@@ -55,7 +55,7 @@ function header(username, logOutFunction, imgRef){
     return (
         <header>
             <div id="title">Title</div>
-            <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef} onClick={logOutFunction}></img></div>
+            <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef} ></img><img id="logoutImg" src="images/logout.jpg" onClick={() => {logOutFunction()}} title="LOGOUT"></img></div>
         </header>
     );
 }
@@ -66,7 +66,7 @@ function buttons(switchFunction, switchWords){
             <button id="viewStats">View Full Stats</button>
             <button id="viewArchive">Workout Archive</button>
             <button id="logWorkout">Log/Create New Workout</button>
-            <button id="switch" onClick={switchFunction}>{switchWords}</button>
+            <button id="switch" onClick={() => {switchFunction()}}>{switchWords}</button>
         </div>
     );
 }
@@ -164,18 +164,29 @@ function notesText(value, onChange){
     )
 }
 
-function noteSelection(title, timestamp, key){
+function noteSelection(title, timestamp, key, switchToNote, deleteNote, active){
     if (title == ""){
         title = "Title"
     }
+    let className = "NoteSelectionTitle"
+    if (active){
+        className = "NoteSelectionTitleActive"
+    }
     return(
-        <div className="NoteSelection" key={key}><div class="NoteSelectionTitle">{title}</div><div class="NoteSelectionTimestamp">{timestamp}</div><hr></hr></div>
+        <div className="NoteSelection" key={key} onClick={() => {switchToNote(key)}}>
+            <div class={className}>
+                <span>{title}</span>
+                <span id={"deleteSelection"} onClick={(e) => {e.stopPropagation(); deleteNote(key)}}>X</span>
+            </div>
+            <div class="NoteSelectionTimestamp">{timestamp}</div>
+            <hr></hr>
+        </div>
     )
 }
 
 function addNotesSelectionButton(addSelection){
     return(
-        <div id="addNotesSelection" onClick={addSelection}>+</div>
+        <div id="addNotesSelection" onClick={() => {addSelection()}}>+</div>
     )
 }
 
@@ -184,7 +195,11 @@ class NoteSelector extends React.Component{
         let myNotes = this.props.notes;
         let noteSelections = [];
         for (let i = 0; i < myNotes.length; i++){
-            noteSelections[i] = noteSelection(myNotes[i].title, myNotes[i].timestamp, i)
+            if (this.props.currentNote == i){
+                noteSelections[i] = noteSelection(myNotes[i].title, myNotes[i].timestamp, i, this.props.switchToNoteFunction, this.props.deleteNoteFunction, true)
+            }else{
+                noteSelections[i] = noteSelection(myNotes[i].title, myNotes[i].timestamp, i, this.props.switchToNoteFunction, this.props.deleteNoteFunction, false)
+            }
         }
         const noteSelectionsReal = noteSelections
         return(
@@ -214,6 +229,13 @@ class Notes extends React.Component{
             currentNote: 0
         }
         this._pullNotes();
+    }
+
+    _switchToNote(note){
+        console.log(note);
+        this.setState({
+            currentNote: note
+        })
     }
 
     _updateTimestamp(){
@@ -278,7 +300,7 @@ class Notes extends React.Component{
             body: "",
             timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
         }).then(() => {
-            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).get().then((querySnapshot) => {
+            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).orderBy("timestamp", "desc").limit(1).get().then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
                     id = doc.id
                     title = doc.data().title
@@ -294,7 +316,6 @@ class Notes extends React.Component{
                     })
                     let newNotes = this.state.notes;
                     let newCurrentNote = this.state.notes.length;
-                    console.log(newCurrentNote);
                     newNotes.push({
                         title: title,
                         body: body,
@@ -305,20 +326,30 @@ class Notes extends React.Component{
                         notes: newNotes,
                         currentNote: newCurrentNote
                     })
+                    console.log(this.state.notes);
                     this._updateTimestamp();
                 }   
             )
         })
         
     }
-    // let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID)
-    // ref.onSnapshot((doc) => {
-    //     if (!doc.exists) {
-    //         firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID).set({
-    //             id: UID
-    //         });
-    //     }
-    // });
+
+    _deleteNote(key){
+        if (this.state.notes.length > 1){
+            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).doc(this.state.notes[key].id).delete();
+            let newNotes = this.state.notes;
+            newNotes.splice(key, 1);
+            let newCurrentNote = key - 1;
+            if (newCurrentNote < 0){
+                newCurrentNote = 0
+            }
+                this.setState({
+                    notes: newNotes,
+                    currentNote: newCurrentNote
+                })
+        }
+    }
+
     _pullNotes(){
         let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
         let newNotes = []
@@ -371,7 +402,7 @@ class Notes extends React.Component{
         return(<div id="notes">
             {notesHeader()}
             {notesTitle(this.state.notes[this.state.currentNote].title, this._updateTitle.bind(this))}
-            <NoteSelector notes={this.state.notes} currentNote={this.state.currentNote} addNoteFunction={this._addNote.bind(this)}></NoteSelector>
+            <NoteSelector activeNote={this.state.currentNote} notes={this.state.notes} currentNote={this.state.currentNote} addNoteFunction={() => {this._addNote()}} switchToNoteFunction={(key) => {this._switchToNote(key)}} deleteNoteFunction={(key) => {this._deleteNote(key)}}></NoteSelector>
             {notesText(this.state.notes[this.state.currentNote].body, this._updateBody.bind(this))}
         </div>)
     }
