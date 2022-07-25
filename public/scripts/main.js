@@ -146,7 +146,7 @@ class Cal extends React.Component{
 
 function notesHeader(){
     return (
-        <div id="notesHeader">Notes</div>
+        <div id="notesHeader" >Notes</div>
     )
 }
 
@@ -157,32 +157,46 @@ function notesTitle(value, onChange){
     )
 }
 
-function notesText(){
+function notesText(value, onChange){
     return(
-        <textarea id="notesText" placeholder="Enter notes here">
+        <textarea id="notesText" value={value} placeholder="Enter notes here" onChange={e => onChange(e.target.value)}>
         </textarea>
     )
 }
 
-function noteSelection(title, timestamp){
+function noteSelection(title, timestamp, key){
+    if (title == ""){
+        title = "Title"
+    }
     return(
-        <div className="NoteSelection"><div class="NoteSelectionTitle">{title}</div><div class="NoteSelectionTimestamp">{timestamp}</div><hr></hr></div>
+        <div className="NoteSelection" key={key}><div class="NoteSelectionTitle">{title}</div><div class="NoteSelectionTimestamp">{timestamp}</div><hr></hr></div>
+    )
+}
+
+function addNotesSelectionButton(addSelection){
+    return(
+        <div id="addNotesSelection" onClick={addSelection}>+</div>
     )
 }
 
 class NoteSelector extends React.Component{
     render(){
-        let notes = this.props.notes;
-        const noteSelections = notes.map((note) => 
-            noteSelection(note.title, note.timestamp)
-        );
+        let myNotes = this.props.notes;
+        let noteSelections = [];
+        for (let i = 0; i < myNotes.length; i++){
+            noteSelections[i] = noteSelection(myNotes[i].title, myNotes[i].timestamp, i)
+        }
+        const noteSelectionsReal = noteSelections
         return(
             <div id="NoteSelector">
-                {noteSelections}
+                {noteSelectionsReal}
+                {addNotesSelectionButton(this.props.addNoteFunction)}
             </div>
         )
     }
 }
+
+
 
 
 class Notes extends React.Component{
@@ -235,37 +249,130 @@ class Notes extends React.Component{
         )
     }
 
+    _updateBody(newValue){
+        let newNote = this.state.notes[this.state.currentNote]
+        newNote.body = newValue
+        let newNotes = this.state.notes
+        newNotes[this.state.currentNote] = newNote
+        this.setState({
+            notes: newNotes,
+            currentNote: this.state.currentNote
+        })
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
+        ref.doc(this.state.notes[this.state.currentNote].id).set({
+            body: this.state.notes[this.state.currentNote].body,
+            title: this.state.notes[this.state.currentNote].title,
+            timestamp: firebase.firestore.Timestamp.fromDate(new Date())
+        }).then(
+            this._updateTimestamp()
+        )
+    }
+
+    _addNote(){
+        let id = ""
+        let title = ""
+        let body = ""
+        let timestamp = ""
+        firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).add({
+            title: "",
+            body: "",
+            timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
+        }).then(() => {
+            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    id = doc.id
+                    title = doc.data().title
+                    body = doc.data().body
+                    timestamp = doc.data().timestamp
+                })
+            }).then(() => {
+                    firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).doc(id).update({
+                        title: title,
+                        body: body,
+                        timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
+                        id: id
+                    })
+                    let newNotes = this.state.notes;
+                    let newCurrentNote = this.state.notes.length;
+                    console.log(newCurrentNote);
+                    newNotes.push({
+                        title: title,
+                        body: body,
+                        timestamp: timestamp.toString().substring(0, 24),
+                        id: id
+                    })
+                    this.setState({
+                        notes: newNotes,
+                        currentNote: newCurrentNote
+                    })
+                    this._updateTimestamp();
+                }   
+            )
+        })
+        
+    }
+    // let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID)
+    // ref.onSnapshot((doc) => {
+    //     if (!doc.exists) {
+    //         firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(UID).set({
+    //             id: UID
+    //         });
+    //     }
+    // });
     _pullNotes(){
         let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
         let newNotes = []
+        let id = ""
         ref.get().then((querySnapshot) => {
-            let i = 0;
-            querySnapshot.forEach((doc) => {
-                console.log(doc);
-                newNotes[i] = {
-                    body: doc.data().body,
-                    title: doc.data().title,
-                    timestamp:doc.data().timestamp.toDate().toString().substring(0, 24),
-                    id: doc.id
+            if (querySnapshot.empty){
+                firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).add({
+                    title: "",
+                    body: "",
+                    timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
+                }).then(() => {
+                    firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).get().then((querySnapshot) => {
+                        querySnapshot.forEach((doc) => {
+                            id = doc.id
+                        })
+                    }).then(() => {
+                            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY).doc(id).update({
+                                title: "",
+                                body: "",
+                                timestamp: firebase.firestore.Timestamp.fromDate(new Date()),
+                                id: id
+                            })
+                            this._pullNotes()
+                        }   
+                    )
                 }
-                i = i + 1;
-            });
-            this.setState({
-                notes: newNotes
-            })
+                )
+            }else{
+                let i = 0;
+                querySnapshot.forEach((doc) => {
+                    newNotes[i] = {
+                        body: doc.data().body,
+                        title: doc.data().title,
+                        timestamp: doc.data().timestamp.toDate().toString().substring(0, 24),
+                        id: doc.id
+                    }
+                    i = i + 1;
+                });
+                this.setState({
+                    notes: newNotes
+                })
+            }
         })
         .catch((error) => {
             console.log("Error getting documents: ", error);
         });
-        console.log(newNotes)
     }
 
     render(){
         return(<div id="notes">
             {notesHeader()}
             {notesTitle(this.state.notes[this.state.currentNote].title, this._updateTitle.bind(this))}
-            <NoteSelector notes={this.state.notes} currentNote={this.state.currentNote}></NoteSelector>
-            {notesText()}
+            <NoteSelector notes={this.state.notes} currentNote={this.state.currentNote} addNoteFunction={this._addNote.bind(this)}></NoteSelector>
+            {notesText(this.state.notes[this.state.currentNote].body, this._updateBody.bind(this))}
         </div>)
     }
 }

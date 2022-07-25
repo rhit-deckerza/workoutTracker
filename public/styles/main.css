@@ -127,6 +127,7 @@ h1{
 }
 
 .NoteSelectionTitle{
+    width: 160px;
     font-size: 15pt;
     color: black;
     white-space: nowrap;
@@ -139,6 +140,21 @@ h1{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+#addNotesSelection{
+    margin-left: auto;
+    margin-right: auto;
+    height: 40px;
+    line-height: 40px;  
+    width: 40px;  
+    font-size: 1.5em;
+    font-weight: bold;
+    border-radius: 50%;
+    background-color: #083156;
+    color: white;
+    text-align: center;
+    cursor: pointer;
 }
 
 #notesText{
@@ -185,7 +201,11 @@ h1{
     background-color: #B1E1FF;
     margin-right: 2.5px;
     margin-top: 2.5px;
+    max-height: 288.69px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
+
 
 
 #but{
