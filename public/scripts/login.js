@@ -44,6 +44,11 @@ class LoginPage extends React.Component{
         ui.start('#firebaseui-auth-container', uiConfig)
     }
     render(){
-        return(<div id="firebaseui-auth-container"></div>)
+        return(
+        <div className="LoginPage">
+            <div id="loginTitle">Title</div>
+            <div id="firebaseui-auth-container"></div>
+        </div>
+        )
     }
 }

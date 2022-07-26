@@ -423,7 +423,7 @@ class HomePage extends React.Component{
     render(){
         console.log("rerendering");
         return(
-            <div>
+            <div className="HomePage">
                 {header(currUser.getUsername(), this.logout, currUser.getImgRef())}
                 {info(currUser.getUsername(), "100", "130")}
                 {this.renderButtons()}
