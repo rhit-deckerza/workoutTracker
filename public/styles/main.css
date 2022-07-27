@@ -9,7 +9,7 @@ root{
     background: #083156;
 }
 
-root > div{
+.HomePage{
     background: #083156;
     margin: 0;
     padding: 0;
@@ -21,6 +21,32 @@ root > div{
     grid-template-columns: 3fr 1fr;
     grid-template-rows: .5fr 4fr 5fr;
     height: 100vh;
+}
+
+.LoginPage{
+    background: #083156;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-areas: 
+    ". title ."
+    ". auth  ."
+    ".  .    .";
+    height: 100vh;
+    grid-template-rows: 3fr 2fr 2fr;
+}
+
+#firebaseui-auth-container{
+    grid-area: auth;
+}
+
+#loginTitle{
+    grid-area: title;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 50pt;
+    color:White;
+    text-align: center;
+    line-height: 200px;
 }
 
 header {
@@ -107,6 +133,138 @@ h1{
     justify-content: space-between;
 }
 
+#notes{
+    grid-area: cal;
+    background-color: black;
+    margin-left: 20px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-areas: 
+        "header title"
+        "select text";
+    grid-template-columns: 1fr 5fr;
+    grid-template-rows: 1fr 5fr;
+}
+#deleteSelection{
+    float: right;
+    display: inline;
+    color: lightgray;
+    cursor: pointer;
+}
+
+#deleteSelection:hover{
+    color: red;
+}
+.NoteSelection{
+    font-family: 'Work Sans', sans-serif;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+
+.NoteSelectionTitle{
+    font-size: 15pt;
+    color: black;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+}
+
+.NoteSelectionTitleActive{
+    font-size: 15pt;
+    color: #1B8EF2;
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    text-overflow: ellipsis;
+    justify-content: space-between;
+}
+.NoteSelectionTimestamp{
+    font-size: 10pt;
+    color: grey;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#addNotesSelection{
+    margin-left: auto;
+    margin-right: auto;
+    height: 40px;
+    line-height: 40px;  
+    width: 40px;  
+    font-size: 1.5em;
+    font-weight: bold;
+    border-radius: 50%;
+    background-color: #083156;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#notesText{
+    font-family: 'Work Sans', sans-serif;
+    grid-area: text;
+    border:0;
+    padding: 3px;
+    outline:0;
+    margin-top: 2.5px;
+    margin-left: 2.5px;
+    background-color: #B1E1FF;
+    resize: none;
+    font-size: 15pt;
+}
+
+#notesHeader{
+    background-color: #B1E1FF;
+    text-align: center;
+    font-family: 'Work Sans', sans-serif;
+    grid-area: header;
+    font-size: 30pt;
+    margin-right: 2.5px;
+    margin-bottom:2.5px;
+    line-height: 52px;
+}
+
+#notesTitle{
+    font-family: 'Work Sans', sans-serif;
+    grid-area: title;
+    font-size: 25pt;
+    border:0;
+    padding: 3px;
+    outline:0;
+    background-color: #B1E1FF;
+    resize: none;
+    margin-left:2.5px;
+    margin-bottom:2.5px;
+}
+
+#NoteSelector{
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: #B1E1FF;
+    margin-right: 2.5px;
+    margin-top: 2.5px;
+    max-height: 288.69px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#NoteSelector {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+#NoteSelector::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
+}
+
+
+
 #but{
     grid-area: but;
     text-align: center;
@@ -116,7 +274,7 @@ h1{
 button{
     font-family: 'Work Sans', sans-serif;
     border-radius: 12pt;
-    height: 70px;
+    height: 72px;
     padding: 5px 20px;
     margin: 5px 10px;
     font-size: 15pt;
@@ -162,4 +320,15 @@ button{
     height: 40px;
     border-radius: 50%;
     margin-left: 10px;
+}
+
+#logoutImg{
+    height: 40px;
+    border-radius: 50%;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+#switch{
+    margin-top: 30px;
 }
