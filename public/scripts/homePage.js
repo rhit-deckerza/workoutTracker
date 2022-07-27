@@ -21,7 +21,7 @@ function header(username, logOutFunction, imgRef){
     return (
         <header>
             <div id="title">Title</div>
-            <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef} ></img><img id="logoutImg" src="images/logout.jpg" onClick={() => {logOutFunction()}} title="LOGOUT"></img></div>
+            <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef}></img><img id="logoutImg" src="images/logout.jpg" onClick={() => {logOutFunction()}} title="LOGOUT"></img></div>
         </header>
     );
 }

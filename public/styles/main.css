@@ -41,7 +41,12 @@ root{
 }
 
 #loginTitle{
-    grid-area:title;
+    grid-area: title;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 50pt;
+    color:White;
+    text-align: center;
+    line-height: 200px;
 }
 
 header {
