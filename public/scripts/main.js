@@ -6,6 +6,9 @@ function redirect(){
         case "1":
             root.render(<HomePage></HomePage>);
             break;
+        case "2":
+            root.render(<LogWorkoutPage></LogWorkoutPage>);
+            break;
     }
 }
 

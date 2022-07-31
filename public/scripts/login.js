@@ -28,6 +28,16 @@ let User = class{
         return this.fbUser.uid;
     }
 
+    logout(){
+        firebase.auth().signOut().then(function () {
+            // Sign-out successful.
+            console.log("Sign Out Successful");
+        }).catch(function(error){
+            // An error happened.
+            console.log("Sign Out Error");
+        });
+    }
+
 }
 
 class LoginPage extends React.Component{
@@ -52,3 +62,4 @@ class LoginPage extends React.Component{
         )
     }
 }
+

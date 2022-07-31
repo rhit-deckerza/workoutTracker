@@ -26,12 +26,12 @@ function header(username, logOutFunction, imgRef){
     );
 }
 
-function buttons(switchFunction, switchWords){
+function buttons(switchFunction, switchWords, logWorkoutFunction){
     return (
         <div id="but">
             <button id="viewStats">View Full Stats</button>
             <button id="viewArchive">Workout Archive</button>
-            <button id="logWorkout">Log/Create New Workout</button>
+            <button id="logWorkout" onClick={() => {logWorkoutFunction()}}>Log/Create New Workout</button>
             <button id="switch" onClick={() => {switchFunction()}}>{switchWords}</button>
         </div>
     );
@@ -384,16 +384,6 @@ class HomePage extends React.Component{
         }
     }
 
-    logout(){
-        firebase.auth().signOut().then(function () {
-            // Sign-out successful.
-            console.log("Sign Out Successful");
-        }).catch(function(error){
-            // An error happened.
-            console.log("Sign Out Error");
-        });
-    }
-
     switch(){
         if (this.state.notes == 0){
             this.setState(
@@ -412,19 +402,23 @@ class HomePage extends React.Component{
         }
     }
 
+    switchToLogWorkout(){
+        localStorage.setItem("page", "2")
+        redirect();
+    }
+
     renderButtons(){
         if (this.state.notes == 0){
-            return (buttons(this.switch.bind(this), "Switch to Notes"))
+            return (buttons(this.switch.bind(this), "Switch to Notes", this.switchToLogWorkout))
         }else{
-            return (buttons(this.switch.bind(this), "Switch to Calendar"))
+            return (buttons(this.switch.bind(this), "Switch to Calendar", this.switchToLogWorkout))
         }
     }
 
     render(){
-        console.log("rerendering");
         return(
             <div className="HomePage">
-                {header(currUser.getUsername(), this.logout, currUser.getImgRef())}
+                {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
                 {info(currUser.getUsername(), "100", "130")}
                 {this.renderButtons()}
                 {this.state.notesOrCal}
