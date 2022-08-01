@@ -1,3 +1,4 @@
+
 let currUser = null; //Always availible and is a "User"
 let User = class{
     constructor(user){

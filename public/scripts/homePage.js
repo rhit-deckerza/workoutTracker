@@ -1,6 +1,7 @@
 const FB_USERS_COLLECTION_KEY = "Users"
 const FB_EXERCISES_COLLECTION_KEY = "Exercises"
 const FB_NOTES_COLLECTION_KEY = "Notes"
+
 function weekDay(id, weekDay, date){
         return (
             <span id={id}>
@@ -176,8 +177,6 @@ class NoteSelector extends React.Component{
         )
     }
 }
-
-
 
 
 class Notes extends React.Component{

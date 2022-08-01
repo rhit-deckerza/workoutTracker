@@ -1,48 +1,47 @@
 const FB_WORKOUTS_COLLECTION_KEY = "Workouts"
+
 function workoutHeader(title, date, time, updateTitleFunction, updateDateMonthFunction, updateDateDayFunction, updateDateYearFunction, updateTimeFunction){
     return(
         <div id="workoutHeader">
-            <input value={title} id="workoutHeaderTitle" onChange={e => {updateTitleFunction(e.target.value)}}></input>
+            <input value={title} id="workoutHeaderTitle" onChange={e => {updateTitleFunction(e.target)}}></input>
             <span>
-                <input value={date.month} onChange={e => {updateDateMonthFunction(e.target.value)}}>
+                <input id="workoutHeaderDateMonth" value={date.month} onChange={e => {updateDateMonthFunction(e.target)}}>
                 </input>
                 <span>
                     {"/"}
                 </span>
-                <input value={date.day} onChange={e => {updateDateDayFunction(e.target.value)}}>
-                    
+                <input id="workoutHeaderDateDay" value={date.day} onChange={e => {updateDateDayFunction(e.target)}}>
                 </input>
                 <span>
                     {"/"}
                 </span>
-                <input id="yearboy" value={date.year} onChange={e => {updateDateYearFunction(e.target.value)}}>
-                    
+                <input id="workoutHeaderDateYear" value={date.year} onChange={e => {updateDateYearFunction(e.target)}}>
                 </input>
             </span>
             <span>
-                <input value={time.hour1} onChange={e => {updateTimeFunction(e.target.value, 0)}}>
+                <input id="workoutHeaderTimeHr1" value={time.hour1} onChange={e => {updateTimeFunction(e.target, 0)}}>
                 </input>
                 <span>
                     {":"}
                 </span>
-                <input value={time.min1} onChange={e => {updateTimeFunction(e.target.value, 1)}}>
+                <input id="workoutHeaderTimeMin1" value={time.min1} onChange={e => {updateTimeFunction(e.target, 1)}}>
                 </input>
-                <input value={time.meridiem1} onChange={e => {updateTimeFunction(e.target.value, 2)}}>
+                <input id="workoutHeaderTimeMer1" value={time.meridiem1} onChange={e => {updateTimeFunction(e.target, 2)}}>
                     
                 </input>
                 <span>
                     {"-"}
                 </span>
-                <input value={time.hour2} onChange={e => {updateTimeFunction(e.target.value, 3)}}>
+                <input id="workoutHeaderTimeHr2" value={time.hour2} onChange={e => {updateTimeFunction(e.target, 3)}}>
                     
                 </input>
                 <span>
                     {":"}
                 </span>
-                <input value={time.min2} onChange={e => {updateTimeFunction(e.target.value, 4)}}>
+                <input id="workoutHeaderTimeMin2" value={time.min2} onChange={e => {updateTimeFunction(e.target, 4)}}>
                     
                 </input>
-                <input value={time.meridiem2} onChange={e => {updateTimeFunction(e.target.value, 5)}}>
+                <input id="workoutHeaderTimeMer2" value={time.meridiem2} onChange={e => {updateTimeFunction(e.target, 5)}}>
                     
                 </input>
             </span>
@@ -103,19 +102,21 @@ class WorkoutContainer extends React.Component{
                     title: doc.data().title,
                     date: doc.data().date,
                     time: doc.data().time
-                })
+                }, this._initElements)
             }else{
                 this.setState({
                     title: "My Workout",
                     date: this._getDate(),
                     time: this._getTime()
-                }, this._createInFirestore)
+                }, () =>{
+                    this._createInFirestore();
+                    this._initElements();
+                })
             }
-        });
+        })
     }
 
     _createInFirestore(){
-        console.log(this.state);
         let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
             title: this.state.title,
             date: this.state.date,
@@ -172,8 +173,10 @@ class WorkoutContainer extends React.Component{
         return output
     }
 
-    _updateTitle(newValue){ 
-        if (newValue.length < 14){
+    _updateTitle(target){ 
+        let newValue = target.value.trim()
+        if (newValue.length < 20){
+            target.style.width =  ((target.value.length + 1) * 18) + 'px'
             let newDate = this.state.date
             let newTime = this.state.time
             this.setState({
@@ -184,8 +187,10 @@ class WorkoutContainer extends React.Component{
         }
     }
 
-    _updateDateMonth(newValue){ 
+    _updateDateMonth(target){ 
+        let newValue = target.value.trim()
         if (newValue.length < 3){
+            target.style.width =  ((target.value.length + 1) * 14) + 'px'
             let newtitle = this.state.title
             let newDate = this.state.date
             newDate.month = newValue;
@@ -198,8 +203,10 @@ class WorkoutContainer extends React.Component{
         }
     }
 
-    _updateDateDay(newValue){ 
+    _updateDateDay(target){ 
+        let newValue = target.value.trim()
         if (newValue.length < 3){
+            target.style.width =  ((target.value.length + 1) * 14) + 'px'
             let newtitle = this.state.title
             let newDate = this.state.date
             newDate.day = newValue;
@@ -212,8 +219,10 @@ class WorkoutContainer extends React.Component{
         }
     }
 
-    _updateDateYear(newValue){
+    _updateDateYear(target){
+        let newValue = target.value.trim()
         if (newValue.length < 5){
+            target.style.width =  ((target.value.length + 1) * 17) + 'px'
             let newtitle = this.state.title
             let newDate = this.state.date
             newDate.year = newValue;
@@ -226,7 +235,8 @@ class WorkoutContainer extends React.Component{
         }
     }
 
-    _updateTime(newValue, position){
+    _updateTime(target, position){
+        let newValue = target.value.trim()
         if (newValue.length < 3){
             let newtitle = this.state.title
             let newDate = this.state.date
@@ -234,30 +244,111 @@ class WorkoutContainer extends React.Component{
             switch(position){
                 case 0:
                     newTime.hour1 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 14) + 'px'
                     break;
                 case 1:
                     newTime.min1 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 14) + 'px'
                     break;
                 case 2:
                     newTime.meridiem1 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 18) + 'px'
                     break;
                 case 3:
                     newTime.hour2 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 14) + 'px'
                     break;
                 case 4:
                     newTime.min2 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 14) + 'px'
                     break;
                 case 5:
                     newTime.meridiem2 = newValue;
+                    target.style.width =  ((target.value.length + 1) * 18) + 'px'
                     break;
             }
-            
             this.setState({
                 title: newtitle,
                 date: newDate,
                 time: newTime
             }, this._createInFirestore)
         }
+    }
+
+    _initElements(){
+        document.getElementById("workoutHeaderTitle").style.width =  ((this.state.title.length + 1) * 18) + 'px'
+        document.getElementById("workoutHeaderDateDay").style.width =  ((this.state.date.day.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderDateMonth").style.width =  ((this.state.date.month.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderDateYear").style.width =  ((this.state.date.year.length + 1) * 17) + 'px'
+        document.getElementById("workoutHeaderTimeHr1").style.width =  ((this.state.time.hour1.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMin1").style.width =  ((this.state.time.min1.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMer1").style.width =  ((this.state.time.meridiem1.length + 1) * 18) + 'px'
+        document.getElementById("workoutHeaderTimeHr2").style.width =  ((this.state.time.hour2.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMin2").style.width =  ((this.state.time.min2.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMer2").style.width =  ((this.state.time.meridiem2.length + 1) * 18) + 'px'
+
+        document.getElementById("workoutHeaderDateDay").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 31 || parseInt(event.target.value) < 1)){
+                event.target.value = "1";
+                this._updateDateDay(event.target)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderDateMonth").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 12 || parseInt(event.target.value) < 1)){
+                event.target.value = "1";
+                this._updateDateMonth(event.target)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderDateYear").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 2100 || parseInt(event.target.value) < 2000)){
+                event.target.value = "2022";
+                this._updateDateYear(event.target)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderTimeHr1").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 12 || parseInt(event.target.value) < 1)){
+                event.target.value = "12";
+                this._updateTime(event.target, 0)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderTimeMin1").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 60 || parseInt(event.target.value) < 0 || event.target.value.length < 2)){
+                event.target.value = "00";
+                this._updateTime(event.target, 1)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderTimeMer1").addEventListener('blur', (event) => {
+            if (event.target.value != "AM" && event.target.value != "PM"){
+                event.target.value = "AM";
+                this._updateTime(event.target, 2)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderTimeHr2").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 12 || parseInt(event.target.value) < 1)){
+                event.target.value = "12";
+                this._updateTime(event.target, 3)
+            }
+        }, true);
+
+        document.getElementById("workoutHeaderTimeMin2").addEventListener('blur', (event) => {
+            if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 60 || parseInt(event.target.value) < 0 || event.target.value.length < 2)){
+                event.target.value = "00";
+                this._updateTime(event.target, 4)
+            }
+        }, true);
+        
+        document.getElementById("workoutHeaderTimeMer2").addEventListener('blur', (event) => {
+            if (event.target.value != "AM" && event.target.value != "PM"){
+                event.target.value = "AM";
+                this._updateTime(event.target, 5)
+            }
+        }, true);
     }
     
 
