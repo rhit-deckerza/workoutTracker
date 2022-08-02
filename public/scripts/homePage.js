@@ -1,6 +1,7 @@
 const FB_USERS_COLLECTION_KEY = "Users"
 const FB_EXERCISES_COLLECTION_KEY = "Exercises"
 const FB_NOTES_COLLECTION_KEY = "Notes"
+const FB_WORKOUTS_COLLECTION_KEY = "Workouts"
 function weekDay(id, weekDay, date){
         return (
             <span id={id}>
@@ -38,13 +39,23 @@ function buttons(switchFunction, switchWords, logWorkoutFunction){
 }
 
 function info (username, days, hours){
+    let workoutsLine = 'workouts'
+    let hoursLine = 'hours'
+    if (days == 1) {
+        workoutsLine = 'workout'
+    }
+    if (hours == 1) {
+        hoursLine = 'hour'
+    }
+
     return (
-        <div id="info">
-            <p id="infoWelcome">Welcome {username}</p>
-            <p id="infoCompleted">you have completed <h1>{days}</h1> workouts in the past <h1>7</h1> days</p>
-            <p id="infoSpent">and have spent <h1>{hours}</h1> hours in the gym in the last <h1>30</h1> days.</p>
-        </div>
-    );
+            <div id="info">
+                <p id="infoWelcome">Welcome {username}</p>
+                <p id="infoCompleted">you have completed <h1>{days}</h1> {workoutsLine} in the past <h1>7</h1> days</p>
+                <p id="infoSpent">and have spent <h1>{hours}</h1> {hoursLine} in the gym in the last <h1>30</h1> days.</p>
+            </div>
+        );
+
 }
 
 class Cal extends React.Component{
@@ -380,8 +391,11 @@ class HomePage extends React.Component{
         super(props)  
         this.state = {
             notesOrCal: <Cal></Cal>,
-            notes: 0
+            notes: 0,
+            workoutsInLastSeven : 0,
+            hoursInLast30 : 0
         }
+        this.getNumOfWorkouts()
     }
 
     switch(){
@@ -402,6 +416,85 @@ class HomePage extends React.Component{
         }
     }
 
+    getNumOfWorkouts() {
+
+
+        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY)
+        ref.get().then((querySnapshot) => {
+        let workouts = 0;
+        let hours = 0;
+        if (querySnapshot.empty) {
+            return '0';
+        }
+        else {
+                querySnapshot.forEach((doc) => {
+                    let now = new Date()
+                    let rawDay = doc.data().date.day
+                    let rawMonth = doc.data().date.month
+                    let rawYear = doc.data().date.year
+
+                    let rawHour1 = doc.data().time.hour1
+                    let rawMeridiem1 = doc.data().time.meridiem1
+                    let rawMin1 = doc.data().time.min1
+
+                    let rawHour2 = doc.data().time.hour2
+                    let rawMeridiem2 = doc.data().time.meridiem2
+                    let rawMin2 = doc.data().time.min2
+
+                    if (rawDay < 10) {
+                        rawDay = '0' + rawDay
+                    }
+                    if (rawMonth < 10) {
+                        rawMonth = '0' + rawMonth
+                        console.log(rawMonth)
+                    }
+
+                    //convert start and end times of workout to army time
+                    if (rawHour1 == '12' && rawMeridiem1 == 'AM') {
+                        rawHour1 = '00';
+                    }
+                    if (rawHour2 == '12' && rawMeridiem2 == 'AM') {
+                        rawHour2 = '00';
+                    }
+
+                    if (rawMeridiem1 == 'PM' && rawHour1 != '12') {
+                        rawHour1 = +rawHour1 + 12;
+                    }
+                    if (rawMeridiem2 == 'PM' && rawHour2 != '12') {
+                        rawHour2 = +rawHour2 + 12;
+                    }
+
+
+                    let date = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour1 + ':' + rawMin1 + ':00')
+                    let date2 = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour2 + ':' + rawMin2 + ':00')
+                    console.log(date)
+                    let elapsed = now.getTime() - date.getTime();
+                    elapsed = elapsed / (1000*60*60*24)
+
+                    if (elapsed <= 7) {
+                        workouts++;
+                    }
+
+                    if (elapsed <= 30) {
+                        hours += ((date2.getTime() - date.getTime()) / ((1000*60*60)))
+
+                    }
+
+                })
+                
+               hours = Math.round(hours)
+               this.setState(
+                    {
+                        workoutsInLastSeven : workouts.toString(),
+                        hoursInLast30 : hours.toString()
+                    }
+               )
+
+            }
+
+        })
+    }
+
     switchToLogWorkout(){
         localStorage.setItem("page", "2")
         redirect();
@@ -419,7 +512,7 @@ class HomePage extends React.Component{
         return(
             <div className="HomePage">
                 {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
-                {info(currUser.getUsername(), "100", "130")}
+                {info(currUser.getUsername(), this.state.workoutsInLastSeven, this.state.hoursInLast30)}
                 {this.renderButtons()}
                 {this.state.notesOrCal}
             </div>
