@@ -46,6 +46,10 @@ root{
     grid-template-rows: .5fr 5fr 1fr;
 }
 
+.ExerciseContainer{
+    grid-area: exers;
+}
+
 #workoutHeader{
     grid-area: head;
     background-color: #1B8EF2;
@@ -241,6 +245,7 @@ h1{
 #deleteSelection:hover{
     color: red;
 }
+
 .NoteSelection{
     font-family: 'Work Sans', sans-serif;
     padding-left: 10px;

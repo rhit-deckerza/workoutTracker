@@ -204,9 +204,11 @@ class Notes extends React.Component{
     }
 
     _updateTimestamp(){
-        let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
-        ref.doc(this.state.notes[this.state.currentNote].id).get().then((doc) => {
-            let newNote = this.state.notes[this.state.currentNote]
+        // let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_NOTES_COLLECTION_KEY)
+        // ref.doc(this.state.notes[this.state.currentNote].id).get().then((doc) => {
+            
+        // })
+        let newNote = this.state.notes[this.state.currentNote]
             newNote.timestamp = firebase.firestore.Timestamp.fromDate(new Date()).toDate().toString().substring(0, 24)
             let newNotes = this.state.notes
             newNotes[this.state.currentNote] = newNote
@@ -214,7 +216,6 @@ class Notes extends React.Component{
                 notes: newNotes,
                 currentNote: this.state.currentNote
             })
-        })
     }
 
     _updateTitle(newValue){

@@ -70,8 +70,19 @@ function selectExercise(){
     )
 }
 
+function exercise(){
+    
+}
 
+class ExerciseContainer extends React.Component{
+    render(){
+        return(
+            <div className="ExerciseContainer">
 
+            </div>
+        )
+    }
+}
 
 class WorkoutContainer extends React.Component{
     constructor(props){
@@ -351,11 +362,11 @@ class WorkoutContainer extends React.Component{
         }, true);
     }
     
-
     render(){
         return(
             <div className="WorkoutContainer">
                 {workoutHeader(this.state.title, this.state.date, this.state.time, this._updateTitle.bind(this), this._updateDateMonth.bind(this), this._updateDateDay.bind(this), this._updateDateYear.bind(this), this._updateTime.bind(this))}
+                <ExerciseContainer></ExerciseContainer>
                 {workoutButtons()}
             </div>
         )
