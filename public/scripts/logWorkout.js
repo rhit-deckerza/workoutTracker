@@ -70,15 +70,136 @@ function selectExercise(){
     )
 }
 
-function exercise(){
-    
+function set(set, amountUnit, loadUnit, number, last, removeSetFunction){
+    if (last){
+        return(
+            <div class="logExpansionLast">
+                        <span class="exerExpandSetLast">
+                            {"Set " + number + ":"}
+                        </span>
+                        <span class="exerExpandRepsLast">
+                        <input value={set.amount}></input>
+                        {amountUnit}
+                        &nbsp;@&nbsp;
+                        <input value={set.load}></input>
+                        {loadUnit}
+                        </span>
+                        <img id="logDownArrow" src="images/redMinus.png" onClick={() => {removeSetFunction()}}></img>
+                    </div>
+        )
+    }else{
+        return (<div class="logExpansion">
+                    <span class="exerExpandSet">
+                        {"Set " + number + ":"}
+                    </span>
+                    <span class="exerExpandReps">
+                        <input value={set.amount}></input>
+                        {amountUnit}
+                        &nbsp;@&nbsp;
+                        <input value={set.load}></input>
+                        {loadUnit}
+                    </span>
+                </div>)
+    }
+}
+
+class Exercise extends React.Component{
+    render(){
+    let exercise = this.props.exercise
+    let expanded = this.props.exercise.expanded
+    let amountMin = exercise.sets[0].amount;
+    let amountMax = exercise.sets[0].amount;
+    let loadMin = exercise.sets[0].load;
+    let loadMax = exercise.sets[0].load;
+    let setElements = []
+    for (let i = 0; i < exercise.sets.length; i++){
+        if (parseInt(exercise.sets[i].amount) > parseInt(amountMax)){
+            amountMax = exercise.sets[i].amount
+        }
+        if (parseInt(exercise.sets[i].amount) < parseInt(amountMin)){
+            amountMin = exercise.sets[i].amount
+        }
+        if (parseInt(exercise.sets[i].load) > parseInt(loadMax)){
+            loadMax = exercise.sets[i].load
+        }
+        if (parseInt(exercise.sets[i].load) < parseInt(loadMin)){
+            loadMin = exercise.sets[i].load
+        }
+        setElements[i] = set(exercise.sets[i], exercise.amountUnit, exercise.loadUnit, (i + 1), (i == (exercise.sets.length - 1)), this.props.removeSetFunction);
+    }
+    const setElementsConst = setElements
+    let loadRange = ""
+    let amountRange = ""
+    if (loadMin == loadMax){
+        loadRange = loadMin.toString()
+    }else{
+        loadRange = loadMin.toString() + "-" + loadMax.toString()
+    }
+    if (amountMin == amountMax){
+        amountRange = amountMax.toString()
+    }else{
+        amountRange = amountMin.toString() + "-" + amountMax.toString()
+    }
+    if (expanded){
+        return(<div class="logExercise">
+                    <div>
+                        <span class="logExerciseName">
+                            {exercise.name}
+                        </span>
+                        <span class="logExerciseSets">
+                            {exercise.sets.length + " Sets"}
+                        </span>
+                        <span class="logExerciseReps">
+                            {amountRange + " " + exercise.amountUnit + " @ " + loadRange + " " + exercise.loadUnit}
+                        </span>
+                        <img id="logDownArrow" src="images/downArrow.png" onClick={() => {this.props.expandExerciseFunction()}}></img>
+                    </div>
+                    {setElementsConst}
+                    <div class="logExpansionAdd">
+                        <span class="exerExpandSetAdd">
+                            {"Set " + (exercise.sets.length + 1).toString() + ":"}
+                        </span>
+                        <span class="exerExpandRepsAdd">
+                            {exercise.sets[(exercise.sets.length - 1)].amount + " " + exercise.amountUnit + " @ " + exercise.sets[(exercise.sets.length - 1)].load + " " + exercise.loadUnit}
+                        </span>
+                        <img id="logDownArrow" src="images/plus.png" onClick={() => {this.props.addSetFunction()}}></img>
+                    </div>
+                </div>)
+    }else{
+        return(
+            <div class="logExercise">
+                <div>
+                    <span class="logExerciseName">
+                        {exercise.name}
+                    </span>
+                    <span class="logExerciseSets">
+                        {exercise.sets.length + " Sets"}
+                    </span>
+                    <span class="logExerciseReps">
+                        {amountRange + " " + exercise.amountUnit + " @ " + loadRange + " " + exercise.loadUnit}
+                    </span>
+                    <img id="logDownArrow" src="images/downArrow.png" onClick={() => {this.props.expandExerciseFunction()}}></img>
+                </div>
+            </div>
+        )
+    }
+    }
 }
 
 class ExerciseContainer extends React.Component{
+    constructor(props){
+        super(props)
+    }
+    
     render(){
+        let exercises = []
+        for (let i = 0; i < this.props.exercises.length; i++){
+            exercises[i] = <Exercise exercise={this.props.exercises[i]} addSetFunction={() => {this.props.addSetFunction(i)}} removeSetFunction={() => {this.props.removeSetFunction(i)}} expandExerciseFunction={() => {this.props.expandExerciseFunction(i)}}></Exercise>
+        }
+        const exercisesFinal = exercises
         return(
             <div className="ExerciseContainer">
-
+                {exercisesFinal}
             </div>
         )
     }
@@ -101,7 +222,8 @@ class WorkoutContainer extends React.Component{
                 hour2: "",
                 min2: "",
                 meridiem2: "",
-            }
+            },
+            exercises: []
         }
         this._pullFromFirestore();
     }
@@ -112,13 +234,15 @@ class WorkoutContainer extends React.Component{
                 this.setState({
                     title: doc.data().title,
                     date: doc.data().date,
-                    time: doc.data().time
+                    time: doc.data().time,
+                    exercises: doc.data().exercises
                 }, this._initElements)
             }else{
                 this.setState({
                     title: "My Workout",
                     date: this._getDate(),
-                    time: this._getTime()
+                    time: this._getTime(),
+                    exercises: []
                 }, () =>{
                     this._createInFirestore();
                     this._initElements();
@@ -131,7 +255,8 @@ class WorkoutContainer extends React.Component{
         let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
             title: this.state.title,
             date: this.state.date,
-            time: this.state.time
+            time: this.state.time,
+            exercises: this.state.exercises
         })
     }
 
@@ -153,8 +278,6 @@ class WorkoutContainer extends React.Component{
         let secondTime = parseInt(time.slice(0,-9)) + 1
         let amOrPm = time.slice(8,10)
         let fulltime = ""
-        console.log(time);
-        console.log(amOrPm);
         if (amOrPm == "PM"){
             if (secondTime > 11){
                 secondTime = 12
@@ -185,9 +308,9 @@ class WorkoutContainer extends React.Component{
     }
 
     _updateTitle(target){ 
-        let newValue = target.value.trim()
+        let newValue = target.value;
         if (newValue.length < 20){
-            target.style.width =  ((target.value.length + 1) * 18) + 'px'
+            target.style.width =  ((target.value.length + 1) * 19) + 'px'
             let newDate = this.state.date
             let newTime = this.state.time
             this.setState({
@@ -286,8 +409,35 @@ class WorkoutContainer extends React.Component{
         }
     }
 
+    _addSet(exerciseIndex){
+        let previousSet = this.state.exercises[exerciseIndex].sets[this.state.exercises[exerciseIndex].sets.length - 1]
+        let newExercises = this.state.exercises
+        newExercises[exerciseIndex].sets.push(previousSet)
+        this.setState({
+            exercises: newExercises
+        }, this._createInFirestore)
+    }
+
+    _removeSet(exerciseIndex){
+        let newExercises = this.state.exercises
+        if (newExercises[exerciseIndex].sets.length != 1){
+            newExercises[exerciseIndex].sets.pop()
+            this.setState({
+                exercises: newExercises
+            }, this._createInFirestore)
+        }
+    }
+
+    _expandExercise(exerciseIndex){
+        let newExercises = this.state.exercises
+        newExercises[exerciseIndex].expanded = !newExercises[exerciseIndex].expanded
+        this.setState({
+            exercises: newExercises
+        }, this._createInFirestore)
+    }
+
     _initElements(){
-        document.getElementById("workoutHeaderTitle").style.width =  ((this.state.title.length + 1) * 18) + 'px'
+        document.getElementById("workoutHeaderTitle").style.width =  ((this.state.title.length + 1) * 19) + 'px'
         document.getElementById("workoutHeaderDateDay").style.width =  ((this.state.date.day.length + 1) * 14) + 'px'
         document.getElementById("workoutHeaderDateMonth").style.width =  ((this.state.date.month.length + 1) * 14) + 'px'
         document.getElementById("workoutHeaderDateYear").style.width =  ((this.state.date.year.length + 1) * 17) + 'px'
@@ -366,10 +516,77 @@ class WorkoutContainer extends React.Component{
         return(
             <div className="WorkoutContainer">
                 {workoutHeader(this.state.title, this.state.date, this.state.time, this._updateTitle.bind(this), this._updateDateMonth.bind(this), this._updateDateDay.bind(this), this._updateDateYear.bind(this), this._updateTime.bind(this))}
-                <ExerciseContainer></ExerciseContainer>
+                <ExerciseContainer exercises={this.state.exercises} addSetFunction={this._addSet.bind(this)} removeSetFunction={this._removeSet.bind(this)} expandExerciseFunction={this._expandExercise.bind(this)}></ExerciseContainer>
                 {workoutButtons()}
             </div>
         )
+    }
+}
+
+class WorkoutSelector extends React.Component{
+    constructor(props){
+        super(props)
+        this.state = {
+            currentExercise: '',
+            exercises: []
+        }
+        this._pullFromFirestore();
+    }
+
+    exerciseButton(name, type){
+        return(
+            <button class={type}>
+                {name}
+            </button>
+        )
+    }
+
+    _pullFromFirestore(){
+        let exercises = []
+            let ref = firebase.firestore().collection(FB_EXERCISES_COLLECTION_KEY)
+                ref.get().then((querySnapshot) => {
+                    let i = 0;
+                    querySnapshot.forEach((doc) => {
+                        exercises[i] = this.exerciseButton(doc.id, doc.data().type)
+                        i = i + 1;
+                    })
+                    const exercisesFinal = exercises
+                    this.setState({
+                        exercises: exercisesFinal
+                    })
+                })
+    }
+
+
+    exerciseSelected() {
+        this.setState({
+            currentExercise: 'exercies'
+        }, () => {
+            console.log('exercise selected:', this.state.currentExercise)
+        })
+    }
+
+
+
+    addExercise() {
+        if (this.state.currentExercise != '') {
+            this.setState({
+                currentExercise: ''
+            })
+        }
+    }
+
+    render() {
+                return (
+                    <div id="selectExerciseContainer">
+                            <p id="pick">Pick an Exercise</p>
+                            <p id="search"><h2> Search:    </h2></p>
+                            <input id="userInput" type="text" placeholder="Exercise"></input>
+                            <div>
+                                {this.state.exercises}
+                            </div>
+                    </div>
+                )
     }
 }
 
@@ -380,7 +597,7 @@ class LogWorkoutPage extends React.Component{
             <div className="LogWorkoutPage">
                 {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
                 <WorkoutContainer></WorkoutContainer>
-                {selectExercise()}
+                <WorkoutSelector></WorkoutSelector>
             </div>
         )
     }

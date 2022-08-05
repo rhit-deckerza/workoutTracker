@@ -36,6 +36,35 @@ root{
     height: 100vh;
 }
 
+#pick{
+    margin-left: 40px;
+    font-size: 35pt;
+    padding-left: 40px;
+    color:white;
+    font-family: 'Work Sans', sans-serif;
+    margin-bottom:-20px;
+
+}
+
+#search{
+    font-size: 15pt;
+    margin-left: 30px;
+    padding-left:20px;
+    color:white;
+    font-family: 'Work Sans', sans-serif;
+    display: inline-block;
+}
+
+#userInput{
+    margin-left: 20px;
+    font-size: 15pt;
+    padding-left:80px;
+    display:inline-block;
+    height: 30px;
+    
+}
+
+
 .WorkoutContainer{
     grid-area: workout;
     display: grid;
@@ -48,6 +77,114 @@ root{
 
 .ExerciseContainer{
     grid-area: exers;
+    display: flex;
+    flex-direction: column;
+}
+
+.logExercise{
+    background-color: #B1E1FF;
+    width: 950px;
+    font-family: 'Work Sans', sans-serif;
+    font-size: 18pt;
+    display: flex;
+    flex-direction: column;
+    margin: 10px auto;
+    padding: 10px 12px;
+    border-radius: 15px;
+}
+
+.logExercise > div{
+    display: flex;
+    justify-content: space-between;
+}
+
+.logExerciseName{
+    background-color: #FF7777;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseSets{
+    background-color: white;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseReps{
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.exerExpandSet{
+    
+}
+
+.exerExpandReps{
+    margin-right: 600px;
+}
+
+.exerExpandReps > input{
+    background-color: #B1E1FF;
+    outline: 0;
+    border: 0;
+    font-size: 20pt;
+    font-family: 'Work Sans', sans-serif;
+    width: 35px;
+}
+
+.exerExpandRepsLast > input{
+    background-color: #B1E1FF;
+    outline: 0;
+    border: 0;
+    font-size: 20pt;
+    font-family: 'Work Sans', sans-serif;
+    width: 35px;
+}
+
+.exerExpandSetAdd{
+    color:gray;
+}
+
+.exerExpandRepsAdd{
+    color:gray;
+    margin-right: 535px;
+}
+
+
+.exerExpandSetLast > input{
+    background-color: #B1E1FF;
+    outline: 0;
+    border: 0;
+    font-size: 20pt;
+    font-family: 'Work Sans', sans-serif;
+    width: 35px;
+}
+
+.exerExpandRepsLast{
+    margin-right: 535px;
+}
+
+.logExpansion{
+    padding: 5px 10px 5px 10px;
+    font-size: 20pt;
+}
+
+.logExpansionAdd{
+    padding: 5px 10px 5px 10px;
+    font-size: 20pt;
+    background-color: rgba(220, 220, 220, 0.5);
+    border-radius: 15px;
+}
+
+.logExpansionLast{
+    padding: 5px 10px 5px 10px;
+    font-size: 20pt;
+    border-radius: 15px;
+}
+
+#logDownArrow{
+    height: 25px;
+    margin: auto 0;
 }
 
 #workoutHeader{
@@ -394,6 +531,7 @@ button{
 #selectExerciseContainer{
     grid-area: pick;
     background-color: #1A2E40;
+    overflow-y: scroll;
 }
 
 #cal > span{
@@ -435,4 +573,83 @@ button{
 
 #switch{
     margin-top: 30px;
+}
+
+.arm{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #FF9912;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
+}
+.back{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #FFF177;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
+}
+.shoulder{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #f77;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
+}
+.chest{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #B37DDC;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
+}
+.leg{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #5FE46C;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
+}
+.core{
+    margin-left:50px;
+    text-align: center;
+    grid: but;
+    background-color: #7795FF;
+    height: 60px;
+    width: 200px;
+    margin-bottom: 10px;
+    border-radius: 1000px;
+    border: none;
+    float:left;
+    line-height: 12pt;
 }
