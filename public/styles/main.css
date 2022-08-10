@@ -55,14 +55,6 @@ root{
     display: inline-block;
 }
 
-#userInput{
-    margin-left: 20px;
-    font-size: 15pt;
-    padding-left:80px;
-    display:inline-block;
-    height: 30px;
-    
-}
 
 
 .WorkoutContainer{
@@ -120,7 +112,7 @@ root{
 }
 
 .exerExpandReps{
-    margin-right: 600px;
+    margin-right: 575px;
 }
 
 .exerExpandReps > input{
@@ -129,7 +121,6 @@ root{
     border: 0;
     font-size: 20pt;
     font-family: 'Work Sans', sans-serif;
-    width: 35px;
 }
 
 .exerExpandRepsLast > input{
@@ -147,7 +138,7 @@ root{
 
 .exerExpandRepsAdd{
     color:gray;
-    margin-right: 535px;
+    margin-right: 480px;
 }
 
 
@@ -161,7 +152,7 @@ root{
 }
 
 .exerExpandRepsLast{
-    margin-right: 535px;
+    margin-right: 480px;
 }
 
 .logExpansion{
@@ -530,8 +521,50 @@ button{
 
 #selectExerciseContainer{
     grid-area: pick;
+    display: grid;
+    grid-template-areas:
+    "type"
+    "select";
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 5fr;
     background-color: #1A2E40;
+    font-family: 'Work Sans', sans-serif;
+    color: white;
+    height: 92vh;
+}
+
+#pickAnExercise{
+    grid-area: type;
+    text-align: center;
+    line-height: 80px;
+}
+
+#pickAnExercise > span{
+    font-size: 35pt;
+}
+
+#pickAnExercise > div > label{
+    font-size: 25pt;
+}
+
+#pickAnExercise > div > input{
+    font-size: 20pt;
+    font-family: 'Work Sans', sans-serif;
+    width: 200px;
+}
+
+#exercisesToPick{
+    grid-area: select;
     overflow-y: scroll;
+}
+
+
+#exercisesToPick {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+#exercisesToPick::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
 }
 
 #cal > span{
@@ -576,9 +609,8 @@ button{
 }
 
 .arm{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
-    grid: but;
     background-color: #FF9912;
     height: 60px;
     width: 200px;
@@ -589,7 +621,7 @@ button{
     line-height: 12pt;
 }
 .back{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
     grid: but;
     background-color: #FFF177;
@@ -602,7 +634,7 @@ button{
     line-height: 12pt;
 }
 .shoulder{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
     grid: but;
     background-color: #f77;
@@ -615,7 +647,7 @@ button{
     line-height: 12pt;
 }
 .chest{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
     grid: but;
     background-color: #B37DDC;
@@ -628,7 +660,7 @@ button{
     line-height: 12pt;
 }
 .leg{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
     grid: but;
     background-color: #5FE46C;
@@ -641,7 +673,7 @@ button{
     line-height: 12pt;
 }
 .core{
-    margin-left:50px;
+    margin-left:30px;
     text-align: center;
     grid: but;
     background-color: #7795FF;

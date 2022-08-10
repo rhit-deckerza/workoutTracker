@@ -70,7 +70,7 @@ function selectExercise(){
     )
 }
 
-function set(set, amountUnit, loadUnit, number, last, removeSetFunction){
+function set(set, amountUnit, loadUnit, number, last, exerciseIndex, removeSetFunction, changeAmountFunction, changeLoadFunction){
     if (last){
         return(
             <div class="logExpansionLast">
@@ -78,10 +78,10 @@ function set(set, amountUnit, loadUnit, number, last, removeSetFunction){
                             {"Set " + number + ":"}
                         </span>
                         <span class="exerExpandRepsLast">
-                        <input value={set.amount}></input>
+                        <input class="autosize" value={set.amount} onChange={(e) => {changeAmountFunction(e.target, exerciseIndex, (number - 1))}}></input>
                         {amountUnit}
                         &nbsp;@&nbsp;
-                        <input value={set.load}></input>
+                        <input class="autosize" value={set.load} onChange={(e) => {changeLoadFunction(e.target, exerciseIndex, (number - 1))}}></input>
                         {loadUnit}
                         </span>
                         <img id="logDownArrow" src="images/redMinus.png" onClick={() => {removeSetFunction()}}></img>
@@ -93,10 +93,10 @@ function set(set, amountUnit, loadUnit, number, last, removeSetFunction){
                         {"Set " + number + ":"}
                     </span>
                     <span class="exerExpandReps">
-                        <input value={set.amount}></input>
+                        <input class="autosize" value={set.amount} onChange={(e) => {changeAmountFunction(e.target, exerciseIndex, (number - 1))}}></input>
                         {amountUnit}
                         &nbsp;@&nbsp;
-                        <input value={set.load}></input>
+                        <input  class="autosize" value={set.load} onChange={(e) => {changeLoadFunction(e.target, exerciseIndex, (number - 1))}}></input>
                         {loadUnit}
                     </span>
                 </div>)
@@ -125,7 +125,7 @@ class Exercise extends React.Component{
         if (parseInt(exercise.sets[i].load) < parseInt(loadMin)){
             loadMin = exercise.sets[i].load
         }
-        setElements[i] = set(exercise.sets[i], exercise.amountUnit, exercise.loadUnit, (i + 1), (i == (exercise.sets.length - 1)), this.props.removeSetFunction);
+        setElements[i] = set(exercise.sets[i], exercise.amountUnit, exercise.loadUnit, (i + 1), (i == (exercise.sets.length - 1)), this.props.index, this.props.removeSetFunction, this.props.editAmountFunction, this.props.editLoadFunction);
     }
     const setElementsConst = setElements
     let loadRange = ""
@@ -152,7 +152,7 @@ class Exercise extends React.Component{
                         <span class="logExerciseReps">
                             {amountRange + " " + exercise.amountUnit + " @ " + loadRange + " " + exercise.loadUnit}
                         </span>
-                        <img id="logDownArrow" src="images/downArrow.png" onClick={() => {this.props.expandExerciseFunction()}}></img>
+                        <img id="logDownArrow" src="images/upArrow.png" onClick={() => {this.props.expandExerciseFunction()}}></img>
                     </div>
                     {setElementsConst}
                     <div class="logExpansionAdd">
@@ -194,7 +194,14 @@ class ExerciseContainer extends React.Component{
     render(){
         let exercises = []
         for (let i = 0; i < this.props.exercises.length; i++){
-            exercises[i] = <Exercise exercise={this.props.exercises[i]} addSetFunction={() => {this.props.addSetFunction(i)}} removeSetFunction={() => {this.props.removeSetFunction(i)}} expandExerciseFunction={() => {this.props.expandExerciseFunction(i)}}></Exercise>
+            exercises[i] = <Exercise 
+                exercise={this.props.exercises[i]} 
+                addSetFunction={() => {this.props.addSetFunction(i)}} 
+                removeSetFunction={() => {this.props.removeSetFunction(i)}} 
+                expandExerciseFunction={() => {this.props.expandExerciseFunction(i)}} 
+                editAmountFunction={this.props.editAmountFunction}
+                editLoadFunction={this.props.editLoadFunction}
+                index={i}></Exercise>
         }
         const exercisesFinal = exercises
         return(
@@ -415,7 +422,10 @@ class WorkoutContainer extends React.Component{
         newExercises[exerciseIndex].sets.push(previousSet)
         this.setState({
             exercises: newExercises
-        }, this._createInFirestore)
+        }, () => {
+            this._createInFirestore()
+            this._initExpansion()
+        })
     }
 
     _removeSet(exerciseIndex){
@@ -428,15 +438,54 @@ class WorkoutContainer extends React.Component{
         }
     }
 
+    _changeAmount(target, exerciseIndex, setIndex){
+        let newValue = target.value.trim()
+        if (newValue.length < 5){
+            target.style.width = ((target.value.length + 1) * 13) + 'px';
+            let newExercises = this.state.exercises
+            newExercises[exerciseIndex].sets[setIndex].amount = newValue;
+            this.setState({
+                exercises: newExercises
+            },() =>{
+                this._createInFirestore()
+            })
+        }
+    }
+
+    _changeLoad(target, exerciseIndex, setIndex){
+        let newValue = target.value.trim()
+        if (newValue.length < 5){
+            target.style.width = ((target.value.length + 1) * 13) + 'px';
+            let newExercises = this.state.exercises
+            newExercises[exerciseIndex].sets[setIndex].load = newValue;
+            this.setState({
+                exercises: newExercises
+            },() =>{
+                this._createInFirestore()
+            })
+        }
+    }
+
     _expandExercise(exerciseIndex){
         let newExercises = this.state.exercises
         newExercises[exerciseIndex].expanded = !newExercises[exerciseIndex].expanded
         this.setState({
             exercises: newExercises
-        }, this._createInFirestore)
+        }, () => {
+            this._createInFirestore()
+            this._initExpansion()
+        })
+    }
+
+    _initExpansion(){
+        let collection = document.getElementsByClassName("autosize");
+        for (let i = 0; i < collection.length; i++){
+            collection[i].style.width = ((collection[i].value.length + 1) * 13) + 'px'
+        }
     }
 
     _initElements(){
+        this._initExpansion();
         document.getElementById("workoutHeaderTitle").style.width =  ((this.state.title.length + 1) * 19) + 'px'
         document.getElementById("workoutHeaderDateDay").style.width =  ((this.state.date.day.length + 1) * 14) + 'px'
         document.getElementById("workoutHeaderDateMonth").style.width =  ((this.state.date.month.length + 1) * 14) + 'px'
@@ -516,7 +565,13 @@ class WorkoutContainer extends React.Component{
         return(
             <div className="WorkoutContainer">
                 {workoutHeader(this.state.title, this.state.date, this.state.time, this._updateTitle.bind(this), this._updateDateMonth.bind(this), this._updateDateDay.bind(this), this._updateDateYear.bind(this), this._updateTime.bind(this))}
-                <ExerciseContainer exercises={this.state.exercises} addSetFunction={this._addSet.bind(this)} removeSetFunction={this._removeSet.bind(this)} expandExerciseFunction={this._expandExercise.bind(this)}></ExerciseContainer>
+                <ExerciseContainer 
+                exercises={this.state.exercises} 
+                addSetFunction={this._addSet.bind(this)} 
+                removeSetFunction={this._removeSet.bind(this)} 
+                expandExerciseFunction={this._expandExercise.bind(this)} 
+                editAmountFunction={this._changeAmount.bind(this)}
+                editLoadFunction={this._changeLoad.bind(this)}></ExerciseContainer>
                 {workoutButtons()}
             </div>
         )
@@ -543,12 +598,35 @@ class WorkoutSelector extends React.Component{
 
     _pullFromFirestore(){
         let exercises = []
+        let arm = []
+        let back = []
+        let shoulder = []
+        let chest = []
+        let leg = []
+        let core = []
             let ref = firebase.firestore().collection(FB_EXERCISES_COLLECTION_KEY)
                 ref.get().then((querySnapshot) => {
-                    let i = 0;
                     querySnapshot.forEach((doc) => {
-                        exercises[i] = this.exerciseButton(doc.id, doc.data().type)
-                        i = i + 1;
+                        switch(doc.data().type){
+                            case "arm":
+                                arm.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                            case "back":
+                                back.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                            case "shoulder":
+                                shoulder.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                            case "chest":
+                                chest.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                            case "leg":
+                                leg.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                            case "core":
+                                core.push(this.exerciseButton(doc.id, doc.data().type))
+                                break;
+                        }
                     })
                     const exercisesFinal = exercises
                     this.setState({
@@ -567,7 +645,6 @@ class WorkoutSelector extends React.Component{
     }
 
 
-
     addExercise() {
         if (this.state.currentExercise != '') {
             this.setState({
@@ -579,12 +656,17 @@ class WorkoutSelector extends React.Component{
     render() {
                 return (
                     <div id="selectExerciseContainer">
-                            <p id="pick">Pick an Exercise</p>
-                            <p id="search"><h2> Search:    </h2></p>
-                            <input id="userInput" type="text" placeholder="Exercise"></input>
+                        <div id="pickAnExercise">
+                            <span>Pick an Exercise</span>
+                            <br></br>
                             <div>
-                                {this.state.exercises}
+                            <label>Search: </label>
+                            <input type="text"name="userInput"></input>
                             </div>
+                        </div>
+                        <div id="exercisesToPick">
+                            {this.state.exercises}
+                        </div>
                     </div>
                 )
     }
