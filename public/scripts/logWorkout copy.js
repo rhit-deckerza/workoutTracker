@@ -215,185 +215,55 @@ class ExerciseContainer extends React.Component{
 class WorkoutContainer extends React.Component{
     constructor(props){
         super(props)
-    }
-    
-    render(){
-        return(
-            <div className="WorkoutContainer">
-                {workoutHeader(
-                    this.props.data.title,
-                     this.props.data.date,
-                      this.props.data.time,
-                       this.props.updateTitleFunction,
-                       this.props.updateDateMonthFunction,
-                       this.props.updateDateDayFunction,
-                       this.props.updateDateYearFunction,
-                       this.props.updateTimeFunction)}
-                <ExerciseContainer 
-                exercises={this.props.data.exercises} 
-                addSetFunction={this.props.addSetFunction} 
-                removeSetFunction={this.props.removeSetFunction} 
-                expandExerciseFunction={this.props.expandExerciseFunction} 
-                editAmountFunction={this.props.editAmountFunction}
-                editLoadFunction={this.props.editLoadFunction}></ExerciseContainer>
-                {workoutButtons()}
-            </div>
-        )
-    }
-}
-
-class WorkoutSelector extends React.Component{
-    constructor(props){
-        super(props)
-    }
-    render() {
-        let search = this.props.data.search.trim().toLocaleLowerCase()
-        let exercies = []
-        for (let i = 0; i < this.props.data.exercises.length; i++){
-            if (this.props.data.exercises[i].name.toLocaleLowerCase().includes(search)){
-                exercies.push(this.props.data.exercises[i].element)
-            }
-        }
-        const exerciesFinal = exercies
-                return (
-                    <div id="selectExerciseContainer">
-                        <div id="pickAnExercise">
-                            <span>Pick an Exercise</span>
-                            <br></br>
-                            <div>
-                            <label>Search: </label>
-                            <input type="text"name="userInput"  onChange={(e) => {this.props.searchFunction(e.target)}}></input>
-                            </div>
-                        </div>
-                        <div id="exercisesToPick">
-                            {exerciesFinal}
-                        </div>
-                        <button id="addExercise">Add To Workout</button>
-                    </div>
-                )
-    }
-}
-
-
-class LogWorkoutPage extends React.Component{
-
-    constructor(props){
-        super(props);
         this.state = {
-            workoutContainer: {
-                title: "",
-                date: {
-                    month: "",
-                    day: "",
-                    year: ""
-                },
-                time: {
-                    hour1: "",
-                    min1: "",
-                    meridiem1: "",
-                    hour2: "",
-                    min2: "",
-                    meridiem2: "",
-                },
-                exercises: []
+            title: "",
+            date: {
+                month: "",
+                day: "",
+                year: ""
             },
-            workoutSelector: {
-                currentExercise: '',
-                exercises: [],
-                search: ''
-            }
+            time: {
+                hour1: "",
+                min1: "",
+                meridiem1: "",
+                hour2: "",
+                min2: "",
+                meridiem2: "",
+            },
+            exercises: []
         }
         this._pullFromFirestore();
     }
 
     _pullFromFirestore(){
-        //Workout Container
         firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").get().then((doc) => {
             if (doc.exists){
-                let newWorkoutContainer = this.state.workoutContainer
-                newWorkoutContainer.title = doc.data().title
-                newWorkoutContainer.date = doc.data().date
-                newWorkoutContainer.time = doc.data().time
-                newWorkoutContainer.exercises = doc.data().exercises
                 this.setState({
-                    workoutContainer: newWorkoutContainer
+                    title: doc.data().title,
+                    date: doc.data().date,
+                    time: doc.data().time,
+                    exercises: doc.data().exercises
                 }, this._initElements)
             }else{
-                let newWorkoutContainer = this.state.workoutContainer
-                newWorkoutContainer.title = "My Workout"
-                newWorkoutContainer.date = this._getDate()
-                newWorkoutContainer.time = this._getTime()
-                newWorkoutContainer.exercises = []
                 this.setState({
-                    workoutContainer: newWorkoutContainer
+                    title: "My Workout",
+                    date: this._getDate(),
+                    time: this._getTime(),
+                    exercises: []
                 }, () =>{
                     this._createInFirestore();
                     this._initElements();
                 })
             }
         })
-
-
-        //Workout Selector
-        let exercises = []
-        let arm = []
-        let back = []
-        let shoulder = []
-        let chest = []
-        let leg = []
-        let core = []
-            let ref = firebase.firestore().collection(FB_EXERCISES_COLLECTION_KEY)
-                ref.get().then((querySnapshot) => {
-                    querySnapshot.forEach((doc) => {
-                        switch(doc.data().type){
-                            case "arm":
-                                arm.push({
-                                    element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                            case "back":
-                                back.push({element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                            case "shoulder":
-                                shoulder.push({element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                            case "chest":
-                                chest.push({element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                            case "leg":
-                                leg.push({element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                            case "core":
-                                core.push({element: this.exerciseButton(doc.id, doc.data().type),
-                                name: doc.id})
-                                break;
-                        }
-                    })
-                    exercises.push.apply(exercises, arm)
-                    exercises.push.apply(exercises, back)
-                    exercises.push.apply(exercises, shoulder)
-                    exercises.push.apply(exercises, chest)
-                    exercises.push.apply(exercises, leg)
-                    exercises.push.apply(exercises, core)
-                    const exercisesFinal = exercises
-                    let newWorkoutSelector = this.state.workoutSelector
-                    newWorkoutSelector.exercises = exercisesFinal
-                    this.setState({
-                        workoutSelector: newWorkoutSelector
-                    })
-                })
     }
 
     _createInFirestore(){
         let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
-            title: this.state.workoutContainer.title,
-            date: this.state.workoutContainer.date,
-            time: this.state.workoutContainer.time,
-            exercises: this.state.workoutContainer.exercises
+            title: this.state.title,
+            date: this.state.date,
+            time: this.state.time,
+            exercises: this.state.exercises
         })
     }
 
@@ -448,10 +318,12 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value;
         if (newValue.length < 20){
             target.style.width =  ((target.value.length + 1) * 19) + 'px'
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.title = newValue
+            let newDate = this.state.date
+            let newTime = this.state.time
             this.setState({
-                workoutContainer: newWorkoutContainer
+                title: newValue,
+                date: newDate,
+                time: newTime
             }, this._createInFirestore)
         }
     }
@@ -460,10 +332,14 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value.trim()
         if (newValue.length < 3){
             target.style.width =  ((target.value.length + 1) * 14) + 'px'
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.date.month = newValue
+            let newtitle = this.state.title
+            let newDate = this.state.date
+            newDate.month = newValue;
+            let newTime = this.state.time
             this.setState({
-                workoutContainer: newWorkoutContainer
+                title: newtitle,
+                date: newDate,
+                time: newTime
             }, this._createInFirestore)
         }
     }
@@ -472,10 +348,14 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value.trim()
         if (newValue.length < 3){
             target.style.width =  ((target.value.length + 1) * 14) + 'px'
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.date.day = newValue
+            let newtitle = this.state.title
+            let newDate = this.state.date
+            newDate.day = newValue;
+            let newTime = this.state.time
             this.setState({
-                workoutContainer: newWorkoutContainer
+                title: newtitle,
+                date: newDate,
+                time: newTime
             }, this._createInFirestore)
         }
     }
@@ -484,10 +364,14 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value.trim()
         if (newValue.length < 5){
             target.style.width =  ((target.value.length + 1) * 17) + 'px'
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.date.year = newValue
+            let newtitle = this.state.title
+            let newDate = this.state.date
+            newDate.year = newValue;
+            let newTime = this.state.time
             this.setState({
-                workoutContainer: newWorkoutContainer
+                title: newtitle,
+                date: newDate,
+                time: newTime
             }, this._createInFirestore)
         }
     }
@@ -495,7 +379,9 @@ class LogWorkoutPage extends React.Component{
     _updateTime(target, position){
         let newValue = target.value.trim()
         if (newValue.length < 3){
-            let newTime = this.state.workoutContainer.time
+            let newtitle = this.state.title
+            let newDate = this.state.date
+            let newTime = this.state.time
             switch(position){
                 case 0:
                     newTime.hour1 = newValue;
@@ -522,22 +408,20 @@ class LogWorkoutPage extends React.Component{
                     target.style.width =  ((target.value.length + 1) * 18) + 'px'
                     break;
             }
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.time = newTime
             this.setState({
-                workoutContainer: newWorkoutContainer
+                title: newtitle,
+                date: newDate,
+                time: newTime
             }, this._createInFirestore)
         }
     }
 
     _addSet(exerciseIndex){
-        let previousSet = this.state.workoutContainer.exercises[exerciseIndex].sets[this.state.workoutContainer.exercises[exerciseIndex].sets.length - 1]
-        let newExercises = this.state.workoutContainer.exercises
+        let previousSet = this.state.exercises[exerciseIndex].sets[this.state.exercises[exerciseIndex].sets.length - 1]
+        let newExercises = this.state.exercises
         newExercises[exerciseIndex].sets.push(previousSet)
-        let newWorkoutContainer = this.state.workoutContainer
-        newWorkoutContainer.exercises = newExercises
         this.setState({
-            workoutContainer: newWorkoutContainer
+            exercises: newExercises
         }, () => {
             this._createInFirestore()
             this._initExpansion()
@@ -545,13 +429,11 @@ class LogWorkoutPage extends React.Component{
     }
 
     _removeSet(exerciseIndex){
-        let newExercises = this.state.workoutContainer.exercises
+        let newExercises = this.state.exercises
         if (newExercises[exerciseIndex].sets.length != 1){
             newExercises[exerciseIndex].sets.pop()
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.exercises = newExercises
             this.setState({
-                workoutContainer: newWorkoutContainer
+                exercises: newExercises
             }, this._createInFirestore)
         }
     }
@@ -560,12 +442,10 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value.trim()
         if (newValue.length < 5){
             target.style.width = ((target.value.length + 1) * 13) + 'px';
-            let newExercises = this.state.workoutContainer.exercises
+            let newExercises = this.state.exercises
             newExercises[exerciseIndex].sets[setIndex].amount = newValue;
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.exercises = newExercises
             this.setState({
-                workoutContainer: newWorkoutContainer
+                exercises: newExercises
             },() =>{
                 this._createInFirestore()
             })
@@ -576,43 +456,21 @@ class LogWorkoutPage extends React.Component{
         let newValue = target.value.trim()
         if (newValue.length < 5){
             target.style.width = ((target.value.length + 1) * 13) + 'px';
-            let newExercises = this.state.workoutContainer.exercises
+            let newExercises = this.state.exercises
             newExercises[exerciseIndex].sets[setIndex].load = newValue;
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.exercises = newExercises
             this.setState({
-                workoutContainer: newWorkoutContainer
+                exercises: newExercises
             },() =>{
                 this._createInFirestore()
             })
         }
     }
 
-    _exerciseSelected(e) {
-        if (document.getElementById("selectedExercise")){
-            document.getElementById("selectedExercise").style.border = "none"
-            document.getElementById("selectedExercise").id = ""
-        }
-        let value = e.target.innerHTML
-        e.target.style.border = "thick solid #1B8EF2"
-        e.target.id = "selectedExercise"
-        let newWorkoutSelector = this.state.workoutSelector
-        newWorkoutSelector.currentExercise = value
-        this.setState({
-            workoutSelector: newWorkoutSelector
-        }, () => {
-            document.getElementById("addExercise").style.color = "black"
-            document.getElementById("addExercise").style.backgroundColor = "#1B8EF2"
-        })
-    }
-
     _expandExercise(exerciseIndex){
-        let newExercises = this.state.workoutContainer.exercises
+        let newExercises = this.state.exercises
         newExercises[exerciseIndex].expanded = !newExercises[exerciseIndex].expanded
-        let newWorkoutContainer = this.state.workoutContainer
-        newWorkoutContainer.exercises = newExercises
         this.setState({
-            workoutContainer: newWorkoutContainer
+            exercises: newExercises
         }, () => {
             this._createInFirestore()
             this._initExpansion()
@@ -628,16 +486,16 @@ class LogWorkoutPage extends React.Component{
 
     _initElements(){
         this._initExpansion();
-        document.getElementById("workoutHeaderTitle").style.width =  ((this.state.workoutContainer.title.length + 1) * 19) + 'px'
-        document.getElementById("workoutHeaderDateDay").style.width =  ((this.state.workoutContainer.date.day.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderDateMonth").style.width =  ((this.state.workoutContainer.date.month.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderDateYear").style.width =  ((this.state.workoutContainer.date.year.length + 1) * 17) + 'px'
-        document.getElementById("workoutHeaderTimeHr1").style.width =  ((this.state.workoutContainer.time.hour1.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderTimeMin1").style.width =  ((this.state.workoutContainer.time.min1.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderTimeMer1").style.width =  ((this.state.workoutContainer.time.meridiem1.length + 1) * 18) + 'px'
-        document.getElementById("workoutHeaderTimeHr2").style.width =  ((this.state.workoutContainer.time.hour2.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderTimeMin2").style.width =  ((this.state.workoutContainer.time.min2.length + 1) * 14) + 'px'
-        document.getElementById("workoutHeaderTimeMer2").style.width =  ((this.state.workoutContainer.time.meridiem2.length + 1) * 18) + 'px'
+        document.getElementById("workoutHeaderTitle").style.width =  ((this.state.title.length + 1) * 19) + 'px'
+        document.getElementById("workoutHeaderDateDay").style.width =  ((this.state.date.day.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderDateMonth").style.width =  ((this.state.date.month.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderDateYear").style.width =  ((this.state.date.year.length + 1) * 17) + 'px'
+        document.getElementById("workoutHeaderTimeHr1").style.width =  ((this.state.time.hour1.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMin1").style.width =  ((this.state.time.min1.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMer1").style.width =  ((this.state.time.meridiem1.length + 1) * 18) + 'px'
+        document.getElementById("workoutHeaderTimeHr2").style.width =  ((this.state.time.hour2.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMin2").style.width =  ((this.state.time.min2.length + 1) * 14) + 'px'
+        document.getElementById("workoutHeaderTimeMer2").style.width =  ((this.state.time.meridiem2.length + 1) * 18) + 'px'
 
         document.getElementById("workoutHeaderDateDay").addEventListener('blur', (event) => {
             if (isNaN(parseInt(event.target.value)) || (parseInt(event.target.value) > 31 || parseInt(event.target.value) < 1)){
@@ -702,6 +560,34 @@ class LogWorkoutPage extends React.Component{
             }
         }, true);
     }
+    
+    render(){
+        return(
+            <div className="WorkoutContainer">
+                {workoutHeader(this.state.title, this.state.date, this.state.time, this._updateTitle.bind(this), this._updateDateMonth.bind(this), this._updateDateDay.bind(this), this._updateDateYear.bind(this), this._updateTime.bind(this))}
+                <ExerciseContainer 
+                exercises={this.state.exercises} 
+                addSetFunction={this._addSet.bind(this)} 
+                removeSetFunction={this._removeSet.bind(this)} 
+                expandExerciseFunction={this._expandExercise.bind(this)} 
+                editAmountFunction={this._changeAmount.bind(this)}
+                editLoadFunction={this._changeLoad.bind(this)}></ExerciseContainer>
+                {workoutButtons()}
+            </div>
+        )
+    }
+}
+
+class WorkoutSelector extends React.Component{
+    constructor(props){
+        super(props)
+        this.state = {
+            currentExercise: '',
+            exercises: [],
+            search: ''
+        }
+        this._pullFromFirestore();
+    }
 
     exerciseButton(name, type){
         return(
@@ -710,13 +596,81 @@ class LogWorkoutPage extends React.Component{
             </button>
         )
     }
-    //Hasent been used yet
+
+    _pullFromFirestore(){
+        let exercises = []
+        let arm = []
+        let back = []
+        let shoulder = []
+        let chest = []
+        let leg = []
+        let core = []
+            let ref = firebase.firestore().collection(FB_EXERCISES_COLLECTION_KEY)
+                ref.get().then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        switch(doc.data().type){
+                            case "arm":
+                                arm.push({
+                                    element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                            case "back":
+                                back.push({element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                            case "shoulder":
+                                shoulder.push({element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                            case "chest":
+                                chest.push({element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                            case "leg":
+                                leg.push({element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                            case "core":
+                                core.push({element: this.exerciseButton(doc.id, doc.data().type),
+                                name: doc.id})
+                                break;
+                        }
+                    })
+                    exercises.push.apply(exercises, arm)
+                    exercises.push.apply(exercises, back)
+                    exercises.push.apply(exercises, shoulder)
+                    exercises.push.apply(exercises, chest)
+                    exercises.push.apply(exercises, leg)
+                    exercises.push.apply(exercises, core)
+                    const exercisesFinal = exercises
+                    this.setState({
+                        exercises: exercisesFinal
+                    })
+                })
+    }
+
+
+    _exerciseSelected(e) {
+        if (document.getElementById("selectedExercise")){
+            document.getElementById("selectedExercise").style.border = "none"
+            document.getElementById("selectedExercise").id = ""
+        }
+        let value = e.target.innerHTML
+        e.target.style.border = "thick solid #1B8EF2"
+        e.target.id = "selectedExercise"
+        this.setState({
+            currentExercise: value
+        }, () => {
+            document.getElementById("addExercise").style.color = "black"
+            document.getElementById("addExercise").style.backgroundColor = "#1B8EF2"
+        })
+    }
+
+
     _addExercise() {
         if (this.state.currentExercise != '') {
-            let newWorkoutSelector = this.state.workoutSelector
-            newWorkoutSelector.currentExercise = ''
             this.setState({
-                workoutSelector: newWorkoutSelector
+                currentExercise: ''
             })
             if (document.getElementById("selectedExercise")){
                 document.getElementById("selectedExercise").style.border = "none"
@@ -729,33 +683,48 @@ class LogWorkoutPage extends React.Component{
 
     _search(target){
         let newValue = target.value;
-        let newWorkoutSelector = this.state.workoutSelector
-        newWorkoutSelector.search = newValue
         this.setState({
-            workoutSelector: newWorkoutSelector
+            search: newValue
         })
     }
-    
+
+    render() {
+        let search = this.state.search.trim().toLocaleLowerCase()
+        let exercies = []
+        for (let i = 0; i < this.state.exercises.length; i++){
+            if (this.state.exercises[i].name.toLocaleLowerCase().includes(search)){
+                exercies.push(this.state.exercises[i].element)
+            }
+        }
+        const exerciesFinal = exercies
+                return (
+                    <div id="selectExerciseContainer">
+                        <div id="pickAnExercise">
+                            <span>Pick an Exercise</span>
+                            <br></br>
+                            <div>
+                            <label>Search: </label>
+                            <input type="text"name="userInput"  onChange={(e) => {this._search(e.target)}}></input>
+                            </div>
+                        </div>
+                        <div id="exercisesToPick">
+                            {exerciesFinal}
+                        </div>
+                        <button id="addExercise">Add To Workout</button>
+                    </div>
+                )
+    }
+}
+
+
+class LogWorkoutPage extends React.Component{
     
     render(){
         return(
             <div className="LogWorkoutPage">
                 {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
-                <WorkoutContainer
-                data={this.state.workoutContainer}
-                updateTitleFunction={this._updateTitle.bind(this)}
-                updateDateMonthFunction={this._updateDateMonth.bind(this)}
-                updateDateDayFunction={this._updateDateDay.bind(this)}
-                updateDateYearFunction={this._updateDateYear.bind(this)}
-                updateTimeFunction={this._updateTime.bind(this)}
-                addSetFunction={this._addSet.bind(this)}
-                removeSetFunction={this._removeSet.bind(this)}
-                expandExerciseFunction={this._expandExercise.bind(this)}
-                editAmountFunction={this._changeAmount.bind(this)}
-                editLoadFunction={this._changeLoad.bind(this)}></WorkoutContainer>
-                <WorkoutSelector 
-                data={this.state.workoutSelector} 
-                searchFunction={this._search.bind(this)}></WorkoutSelector>
+                <WorkoutContainer></WorkoutContainer>
+                <WorkoutSelector></WorkoutSelector>
             </div>
         )
     }

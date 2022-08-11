@@ -685,3 +685,8 @@ button{
     float:left;
     line-height: 12pt;
 }
+
+#addExercise{
+    font-size: 20pt;
+    color: lightgray;
+}
