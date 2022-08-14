@@ -143,7 +143,7 @@ class Exercise extends React.Component{
     if (expanded){
         return(<div class="logExercise">
                     <div>
-                        <span class="logExerciseName">
+                        <span class={"logExerciseName" + exercise.type}>
                             {exercise.name}
                         </span>
                         <span class="logExerciseSets">
@@ -164,12 +164,13 @@ class Exercise extends React.Component{
                         </span>
                         <img id="logDownArrow" src="images/plus.png" onClick={() => {this.props.addSetFunction()}}></img>
                     </div>
+                    <div id="removeButtonContainer"><button id="removeExerciseButton" onClick={() => {this.props.removeExerciseFunction(this.props.index)}}>REMOVE</button></div>
                 </div>)
     }else{
         return(
             <div class="logExercise">
                 <div>
-                    <span class="logExerciseName">
+                    <span class={"logExerciseName" + exercise.type}>
                         {exercise.name}
                     </span>
                     <span class="logExerciseSets">
@@ -201,6 +202,7 @@ class ExerciseContainer extends React.Component{
                 expandExerciseFunction={() => {this.props.expandExerciseFunction(i)}} 
                 editAmountFunction={this.props.editAmountFunction}
                 editLoadFunction={this.props.editLoadFunction}
+                removeExerciseFunction={this.props.removeExerciseFunction}
                 index={i}></Exercise>
         }
         const exercisesFinal = exercises
@@ -235,7 +237,8 @@ class WorkoutContainer extends React.Component{
                 removeSetFunction={this.props.removeSetFunction} 
                 expandExerciseFunction={this.props.expandExerciseFunction} 
                 editAmountFunction={this.props.editAmountFunction}
-                editLoadFunction={this.props.editLoadFunction}></ExerciseContainer>
+                editLoadFunction={this.props.editLoadFunction}
+                removeExerciseFunction={this.props.removeExerciseFunction}></ExerciseContainer>
                 {workoutButtons()}
             </div>
         )
@@ -268,7 +271,7 @@ class WorkoutSelector extends React.Component{
                         <div id="exercisesToPick">
                             {exerciesFinal}
                         </div>
-                        <button id="addExercise">Add To Workout</button>
+                        <button onClick={() => {this.props.addExerciseFunction()}} id="addExercise">Add To Workout</button>
                     </div>
                 )
     }
@@ -299,6 +302,7 @@ class LogWorkoutPage extends React.Component{
             },
             workoutSelector: {
                 currentExercise: '',
+                currentExerciseType: '',
                 exercises: [],
                 search: ''
             }
@@ -558,8 +562,12 @@ class LogWorkoutPage extends React.Component{
 
     _changeAmount(target, exerciseIndex, setIndex){
         let newValue = target.value.trim()
-        if (newValue.length < 5){
-            target.style.width = ((target.value.length + 1) * 13) + 'px';
+        if (newValue.length == 0 || parseInt(newValue) == 0){
+            newValue = "0"
+        }
+        newValue = parseInt(newValue).toString()
+        if (newValue.length < 5 && !isNaN(newValue)){
+            target.style.width = ((newValue.length + 1) * 13) + 'px';
             let newExercises = this.state.workoutContainer.exercises
             newExercises[exerciseIndex].sets[setIndex].amount = newValue;
             let newWorkoutContainer = this.state.workoutContainer
@@ -574,8 +582,12 @@ class LogWorkoutPage extends React.Component{
 
     _changeLoad(target, exerciseIndex, setIndex){
         let newValue = target.value.trim()
-        if (newValue.length < 5){
-            target.style.width = ((target.value.length + 1) * 13) + 'px';
+        if (newValue.length == 0 || parseInt(newValue) == 0){
+            newValue = "0"
+        }
+        newValue = parseInt(newValue).toString()
+        if (newValue.length < 5 && !isNaN(newValue)){
+            target.style.width = ((newValue.length + 1) * 13) + 'px';
             let newExercises = this.state.workoutContainer.exercises
             newExercises[exerciseIndex].sets[setIndex].load = newValue;
             let newWorkoutContainer = this.state.workoutContainer
@@ -593,11 +605,13 @@ class LogWorkoutPage extends React.Component{
             document.getElementById("selectedExercise").style.border = "none"
             document.getElementById("selectedExercise").id = ""
         }
+        console.log(this.state.workoutSelector.exercises);
         let value = e.target.innerHTML
         e.target.style.border = "thick solid #1B8EF2"
         e.target.id = "selectedExercise"
         let newWorkoutSelector = this.state.workoutSelector
         newWorkoutSelector.currentExercise = value
+        newWorkoutSelector.currentExerciseType = e.target.className
         this.setState({
             workoutSelector: newWorkoutSelector
         }, () => {
@@ -624,6 +638,7 @@ class LogWorkoutPage extends React.Component{
         for (let i = 0; i < collection.length; i++){
             collection[i].style.width = ((collection[i].value.length + 1) * 13) + 'px'
         }
+
     }
 
     _initElements(){
@@ -714,10 +729,26 @@ class LogWorkoutPage extends React.Component{
     _addExercise() {
         if (this.state.currentExercise != '') {
             let newWorkoutSelector = this.state.workoutSelector
-            newWorkoutSelector.currentExercise = ''
-            this.setState({
-                workoutSelector: newWorkoutSelector
+            let exerciseToAdd = newWorkoutSelector.currentExercise
+            let newWorkoutContainer = this.state.workoutContainer
+            newWorkoutContainer.exercises.push({
+                amountUnit: "reps",
+                expanded: false,
+                loadUnit: "lbs",
+                name: exerciseToAdd,
+                sets: [{
+                    amount: "0",
+                    load: "0"
+                    }
+                ],
+                type: newWorkoutSelector.currentExerciseType
             })
+            newWorkoutSelector.currentExercise = ''
+            newWorkoutSelector.currentExerciseType = ''
+            this.setState({
+                workoutSelector: newWorkoutSelector,
+                workoutContainer: newWorkoutContainer
+            }, this._createInFirestore())
             if (document.getElementById("selectedExercise")){
                 document.getElementById("selectedExercise").style.border = "none"
                 document.getElementById("selectedExercise").id = ""
@@ -725,6 +756,14 @@ class LogWorkoutPage extends React.Component{
             document.getElementById("addExercise").style.color = "lightgrey"
             document.getElementById("addExercise").style.backgroundColor = "white"
         }
+    }
+
+    _removeExercise(exerciseIndex){
+        let newWorkoutContainer = this.state.workoutContainer
+        newWorkoutContainer.exercises.splice(exerciseIndex, 1)
+        this.setState({
+            workoutContainer: newWorkoutContainer
+        }, this._createInFirestore)
     }
 
     _search(target){
@@ -752,10 +791,12 @@ class LogWorkoutPage extends React.Component{
                 removeSetFunction={this._removeSet.bind(this)}
                 expandExerciseFunction={this._expandExercise.bind(this)}
                 editAmountFunction={this._changeAmount.bind(this)}
-                editLoadFunction={this._changeLoad.bind(this)}></WorkoutContainer>
+                editLoadFunction={this._changeLoad.bind(this)}
+                removeExerciseFunction={this._removeExercise.bind(this)}></WorkoutContainer>
                 <WorkoutSelector 
                 data={this.state.workoutSelector} 
-                searchFunction={this._search.bind(this)}></WorkoutSelector>
+                searchFunction={this._search.bind(this)}
+                addExerciseFunction={this._addExercise.bind(this)}></WorkoutSelector>
             </div>
         )
     }

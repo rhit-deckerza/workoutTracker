@@ -294,14 +294,13 @@ class Notes extends React.Component{
                     newNotes.push({
                         title: title,
                         body: body,
-                        timestamp: timestamp.toString().substring(0, 24),
+                        timestamp: timestamp.toDate().toString().substring(0, 24),
                         id: id
                     })
                     this.setState({
                         notes: newNotes,
                         currentNote: newCurrentNote
                     })
-                    console.log(this.state.notes);
                     this._updateTimestamp();
                 }   
             )

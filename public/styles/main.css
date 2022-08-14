@@ -71,6 +71,15 @@ root{
     grid-area: exers;
     display: flex;
     flex-direction: column;
+    max-height: 505px;
+    overflow-y: scroll;
+}
+.ExerciseContainer {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+}
+.ExerciseContainer::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
 }
 
 .logExercise{
@@ -90,11 +99,7 @@ root{
     justify-content: space-between;
 }
 
-.logExerciseName{
-    background-color: #FF7777;
-    padding: 5px;
-    border-radius: 15px;
-}
+
 
 .logExerciseSets{
     background-color: white;
@@ -686,7 +691,53 @@ button{
     line-height: 12pt;
 }
 
+.logExerciseNamearm{
+    background-color: #FF9912;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseNameback{
+    background-color: #FFF177;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseNameshoulder{
+    background-color: #f77;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseNamechest{
+    background-color: #B37DDC;
+    padding: 5px;
+    border-radius: 15px;
+}
+.logExerciseNamecore{
+    background-color: #7795FF;
+    padding: 5px;
+    border-radius: 15px;
+}
+
+.logExerciseNameleg{
+    background-color: #5FE46C;
+    padding: 5px;
+    border-radius: 15px;
+}
+
 #addExercise{
     font-size: 20pt;
     color: lightgray;
+}
+
+#removeExerciseButton{
+    background-color: red;
+    height: 30px;
+    line-height: 10px;
+}
+
+#removeButtonContainer{
+    display: flex;
+    justify-content: right;
 }
