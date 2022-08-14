@@ -602,12 +602,12 @@ class LogWorkoutPage extends React.Component{
 
     _exerciseSelected(e) {
         if (document.getElementById("selectedExercise")){
-            document.getElementById("selectedExercise").style.border = "none"
+            document.getElementById("selectedExercise").style.outline = "none"
             document.getElementById("selectedExercise").id = ""
         }
         console.log(this.state.workoutSelector.exercises);
         let value = e.target.innerHTML
-        e.target.style.border = "thick solid #1B8EF2"
+        e.target.style.outline = "thick solid #1B8EF2"
         e.target.id = "selectedExercise"
         let newWorkoutSelector = this.state.workoutSelector
         newWorkoutSelector.currentExercise = value
