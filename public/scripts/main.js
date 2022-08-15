@@ -9,6 +9,9 @@ function redirect(){
         case "2":
             root.render(<LogWorkoutPage></LogWorkoutPage>);
             break;
+        case "3":
+            root.render(<ArchivePage></ArchivePage>);
+            break;
     }
 }
 

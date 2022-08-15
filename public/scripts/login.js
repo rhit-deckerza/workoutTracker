@@ -57,7 +57,7 @@ class LoginPage extends React.Component{
     render(){
         return(
         <div className="LoginPage">
-            <div id="loginTitle">Title</div>
+            <div id="loginTitle">Workout Tracker</div>
             <div id="firebaseui-auth-container"></div>
         </div>
         )

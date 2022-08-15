@@ -1,4 +1,4 @@
-const FB_WORKOUTS_COLLECTION_KEY = "Workouts"
+
 
 function workoutHeader(title, date, time, updateTitleFunction, updateDateMonthFunction, updateDateDayFunction, updateDateYearFunction, updateTimeFunction){
     return(
@@ -49,13 +49,13 @@ function workoutHeader(title, date, time, updateTitleFunction, updateDateMonthFu
     )
 }
 
-function workoutButtons(){
+function workoutButtons(logWorkoutFunction){
     return(
         <div id="workoutButtons">
             <button id="saveTemplateButton">
                 Save as template
             </button>
-            <button id="logWorkoutWorkout">
+            <button onClick={() => {logWorkoutFunction()}}id="logWorkoutWorkout">
                 Log workout
             </button>
         </div>
@@ -239,7 +239,7 @@ class WorkoutContainer extends React.Component{
                 editAmountFunction={this.props.editAmountFunction}
                 editLoadFunction={this.props.editLoadFunction}
                 removeExerciseFunction={this.props.removeExerciseFunction}></ExerciseContainer>
-                {workoutButtons()}
+                {workoutButtons(this.props.logWorkoutFunction)}
             </div>
         )
     }
@@ -750,7 +750,8 @@ class LogWorkoutPage extends React.Component{
                 workoutContainer: newWorkoutContainer
             }, this._createInFirestore())
             if (document.getElementById("selectedExercise")){
-                document.getElementById("selectedExercise").style.border = "none"
+                console.log("resetting");
+                document.getElementById("selectedExercise").style.outline = "none"
                 document.getElementById("selectedExercise").id = ""
             }
             document.getElementById("addExercise").style.color = "lightgrey"
@@ -774,12 +775,41 @@ class LogWorkoutPage extends React.Component{
             workoutSelector: newWorkoutSelector
         })
     }
+
+    _logWorkout(){
+        console.log("logging workout");
+        firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc().set({
+            title: this.state.workoutContainer.title,
+            date: this.state.workoutContainer.date,
+            time: this.state.workoutContainer.time,
+            exercises: this.state.workoutContainer.exercises
+        }).then(() => {
+            let newWorkoutContainer = {
+                title: "My Workout",
+                date: this._getDate(),
+                time: this._getTime(),
+                exercises: []
+            }
+            console.log("Setting State");
+            this.setState({
+                workoutContainer: newWorkoutContainer
+            }, () => {
+                this._initElements();
+                let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
+                    title: this.state.workoutContainer.title,
+                    date: this.state.workoutContainer.date,
+                    time: this.state.workoutContainer.time,
+                    exercises: this.state.workoutContainer.exercises
+                })
+            })
+        });
+    }
     
     
     render(){
         return(
             <div className="LogWorkoutPage">
-                {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
+                {header(currUser.getUsername(), currUser.logout, currUser.getImgRef(), returnToHomepage)}
                 <WorkoutContainer
                 data={this.state.workoutContainer}
                 updateTitleFunction={this._updateTitle.bind(this)}
@@ -792,7 +822,8 @@ class LogWorkoutPage extends React.Component{
                 expandExerciseFunction={this._expandExercise.bind(this)}
                 editAmountFunction={this._changeAmount.bind(this)}
                 editLoadFunction={this._changeLoad.bind(this)}
-                removeExerciseFunction={this._removeExercise.bind(this)}></WorkoutContainer>
+                removeExerciseFunction={this._removeExercise.bind(this)}
+                logWorkoutFunction={this._logWorkout.bind(this)}></WorkoutContainer>
                 <WorkoutSelector 
                 data={this.state.workoutSelector} 
                 searchFunction={this._search.bind(this)}

@@ -290,6 +290,7 @@ header > div{
 
 #title{
     margin-left: 10px;
+    cursor: pointer;
 }
 
 #usernameImgContainer{
@@ -594,6 +595,7 @@ button{
     width: 100%;
     height: 3pt;
     background-color: black;
+    margin-bottom: 10px;
 }
 
 #userImg{
@@ -740,4 +742,68 @@ button{
 #removeButtonContainer{
     display: flex;
     justify-content: right;
+}
+
+.ArchivePage{
+    display: grid;
+    grid-template-areas: 
+    "nav nav"
+    "date exer";
+    grid-template-rows: .5fr 9fr;
+    grid-template-columns: 3fr 1fr;
+    height: 100vh;
+}
+
+.DateArchive{
+    grid-area: date;
+    background-color: red;
+}
+
+.ExerciseArchive{
+    grid-area: exer;
+    background-color: blue;
+}
+
+
+  
+.weekdayTime{
+    font-family: 'Work Sans', sans-serif;
+    display: none;
+}
+  
+.armBlock{
+    display: inline-block;
+    background-color: #FF9912;
+    width: 12px;
+    height: 12px;
+}
+.coreBlock{
+    display: inline-block;
+    background-color: #7795FF;
+    width: 12px;
+    height: 12px;
+}
+.legBlock{
+    display: inline-block;
+    background-color: #5FE46C;
+    width: 12px;
+    height: 12px;
+}
+.chestBlock{
+    display: inline-block;
+    background-color: #B37DDC;
+    width: 12px;
+    height: 12px;
+}
+.shoulderBlock{
+    display: inline-block;
+    background-color: #f77;
+    width: 12px;
+    height: 12px;
+}
+.backBlock{
+    display: inline-block;
+    background-color: #FFF177;
+    width: 12px;
+    height: 12px;
 }

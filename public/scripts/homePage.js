@@ -1,8 +1,10 @@
 const FB_USERS_COLLECTION_KEY = "Users"
 const FB_EXERCISES_COLLECTION_KEY = "Exercises"
 const FB_NOTES_COLLECTION_KEY = "Notes"
+const FB_WORKOUTS_COLLECTION_KEY = "Workouts"
 
-function weekDay(id, weekDay, date){
+function weekDay(id, weekDay, date, i){
+    let calString = "calDiv" + i.toString()
         return (
             <span id={id}>
                 <span>
@@ -14,24 +16,39 @@ function weekDay(id, weekDay, date){
                 <span class="myLine">
                     
                 </span>
+                <div class="weekdayTime">2 hours</div>
+                <div class="weekdayTime">and 47 minutes</div>
+                <div id={calString}></div>
+                <div id={id + "0"} class="weekdayTime"><span class="armBlock"></span> Arms</div>
+                <div id={id + "1"} class="weekdayTime"><span class="coreBlock"></span> Core</div>
+                <div id={id + "2"} class="weekdayTime"><span class="legBlock"></span> Legs</div>
+                <div id={id + "3"} class="weekdayTime"><span class="shoulderBlock"></span> Shoulders</div>
+                <div id={id + "4"} class="weekdayTime"><span class="chestBlock"></span> Chest</div>
+                <div id={id + "5"} class="weekdayTime"><span class="backBlock"></span> Back</div>
             </span>
         );
 }
 
-function header(username, logOutFunction, imgRef){
+
+function header(username, logOutFunction, imgRef, returnToHomepageFunction){
     return (
         <header>
-            <div id="title">Title</div>
+            <div id="title" onClick={() => {returnToHomepageFunction()}}>Workout Tracker</div>
             <div id="usernameImgContainer">{username}<img id="userImg" src={imgRef}></img><img id="logoutImg" src="images/logout.jpg" onClick={() => {logOutFunction()}} title="LOGOUT"></img></div>
         </header>
     );
+}
+
+function returnToHomepage(){
+    localStorage.setItem("page", "1")
+    redirect();
 }
 
 function buttons(switchFunction, switchWords, logWorkoutFunction){
     return (
         <div id="but">
             <button id="viewStats">View Full Stats</button>
-            <button id="viewArchive">Workout Archive</button>
+            <button id="viewArchive" onClick={() => {localStorage.setItem("page", "3"); redirect();}}>Workout Archive</button>
             <button id="logWorkout" onClick={() => {logWorkoutFunction()}}>Log/Create New Workout</button>
             <button id="switch" onClick={() => {switchFunction()}}>{switchWords}</button>
         </div>
@@ -104,16 +121,183 @@ class Cal extends React.Component{
             return dateString + 'th'
         }
     }
+    componentDidMount(){
+        
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages':['corechart']});
+  
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.charts.setOnLoadCallback(this.drawChart.bind(this));
+  
+        // Callback that creates and populates a data table,
+        // instantiates the pie chart, passes in the data and
+        // draws it.
+      }
+  
+
+      
+          
+          
+      drawChart(){
+        let days = []
+        for (let i = 0; i < 7; i++){
+            days[i] = new google.visualization.DataTable();
+            days[i].addColumn('string', 'Type');
+            days[i].addColumn('number', 'Count');
+        }
+        let dates = [(this.d.getDate() - 6).toString(), (this.d.getDate() - 5).toString(), (this.d.getDate() - 4).toString(), (this.d.getDate() - 3).toString(), (this.d.getDate() - 2).toString(), (this.d.getDate() - 1).toString(), (this.d.getDate()).toString()]
+        
+        console.log(dates);
+        
+        firebase.firestore()
+        .collection(FB_USERS_COLLECTION_KEY)
+        .doc(currUser.getUID())
+        .collection(FB_WORKOUTS_COLLECTION_KEY)
+        .where("date.year", "==", this.d.getFullYear().toString())
+        .where("date.month", "==", (this.d.getMonth() + 1).toString())
+        .where("date.day", "in", dates)
+        .get().then((querySnapshot) => {
+            let counts = []
+                for (let i = 0; i < 7; i++){
+                    counts[i] = {
+                        core: 0,
+                        leg: 0,
+                        chest: 0,
+                        shoulder: 0,
+                        back: 0,
+                        arm: 0
+                    }
+                }
+            querySnapshot.forEach((doc) => {
+                switch(doc.data().date.day){
+                    case dates[0]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[0][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[1]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[1][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[2]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[2][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[3]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[3][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[4]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[4][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[5]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[5][doc.data().exercises[i].type]++;
+                        }
+                        break
+                    case dates[6]:
+                        for (let i = 0; i < doc.data().exercises.length; i++){
+                            counts[6][doc.data().exercises[i].type]++;
+                        }
+                        break
+                }
+            })
+            for (let i = 0; i < 7; i++){
+                days[i].addRows([
+                    ['core', counts[i].core],
+                    ['leg', counts[i].leg],
+                    ['chest', counts[i].chest],
+                    ['shoulder', counts[i].shoulder],
+                    ['back', counts[i].back],
+                    ['arm', counts[i].arm]
+                  ]);
+            }
+            var options = {
+                legend: {position:"none"},
+                enableInteractivity: false,
+                chartArea: {left: "1px", width:125,
+                height:125, top:10, bottom:10},
+                pieSliceText: 'none',
+                slices: {
+                    0: { color: '#7795FF' },
+                    1: { color: '#5FE46C' },
+                    2: { color: '#B37DDC' },
+                    3: { color: '#f77777' },
+                    4: { color: '#FFF177' },
+                    5: { color: '#FF9912' }
+                  },
+                backgroundColor: "#B1E1FF",
+                height: 145};
+        
+                let groups = ["arm", "core", "leg", "shoulder", "chest", "back"]
+                // Instantiate and draw our chart, passing in some options.
+                for (let i = 0; i < 7; i++){
+                    let idString = "calDiv" + i.toString()
+                    var chart = new google.visualization.PieChart(document.getElementById(idString));
+                    chart.draw(days[i], options);
+                    for (let j = 0; j < 6; j++){
+                        console.log(counts);
+                        console.log(counts[i][groups[j]]);
+                        if (parseInt(counts[i][groups[j]]) > 0){
+                            let id = this.intToWord(i + 1) + "Cal" + j
+                            console.log(id);
+                            document.getElementById(id).style.display = "block"
+                        }
+                    }
+                }
+        })
+          
+      }
+    
+    intToWord(int){
+        switch(int){
+            case 0:
+                return "zero"
+                break
+            case 1:
+                return "one"
+                break
+            case 2:
+                return "two"
+                break
+            case 3:
+                return "three"
+                break
+            case 4:
+                return "four"
+                break
+            case 5:
+                return "five"
+                break
+            case 6:
+                return "six"
+                break
+            case 7:
+                return "seven"
+                break
+            case 8:
+                return "eight"
+                break
+            case 9:
+                return "nine"
+                break
+        }
+    }
 
     render(){
         return(<div id="cal">
-            {weekDay("oneCal", this.weekDays[this.calDay(6)], this.calDate(6))}
-            {weekDay("twoCal", this.weekDays[this.calDay(5)],this.calDate(5))}
-            {weekDay("threeCal", this.weekDays[this.calDay(4)], this.calDate(4))}
-            {weekDay("fourCal", this.weekDays[this.calDay(3)], this.calDate(3))}
-            {weekDay("fiveCal", this.weekDays[this.calDay(2)], this.calDate(2))}
-            {weekDay("sixCal", this.weekDays[this.calDay(1)], this.calDate(1))}
-            {weekDay("sevenCal", this.weekDays[this.calDay(0)], this.calDate(0))}
+            {weekDay("oneCal", this.weekDays[this.calDay(6)], this.calDate(6), 0)}
+            {weekDay("twoCal", this.weekDays[this.calDay(5)],this.calDate(5), 1)}
+            {weekDay("threeCal", this.weekDays[this.calDay(4)], this.calDate(4), 2)}
+            {weekDay("fourCal", this.weekDays[this.calDay(3)], this.calDate(3), 3)}
+            {weekDay("fiveCal", this.weekDays[this.calDay(2)], this.calDate(2), 4)}
+            {weekDay("sixCal", this.weekDays[this.calDay(1)], this.calDate(1), 5)}
+            {weekDay("sevenCal", this.weekDays[this.calDay(0)], this.calDate(0), 6)}
         </div>)
     }
 
@@ -493,7 +677,7 @@ class HomePage extends React.Component{
     render(){
         return(
             <div className="HomePage">
-                {header(currUser.getUsername(), currUser.logout, currUser.getImgRef())}
+                {header(currUser.getUsername(), currUser.logout, currUser.getImgRef(), returnToHomepage)}
                 {info(currUser.getUsername(), this.state.workoutsInLastSeven, this.state.hoursInLast30)}
                 {this.renderButtons()}
                 {this.state.notesOrCal}
