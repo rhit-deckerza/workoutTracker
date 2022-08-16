@@ -4,7 +4,7 @@ function workoutHeader(title, date, time, updateTitleFunction, updateDateMonthFu
     return(
         <div id="workoutHeader">
             <input value={title} id="workoutHeaderTitle" onChange={e => {updateTitleFunction(e.target)}}></input>
-            <span>
+            <span id="dateContainer">
                 <input id="workoutHeaderDateMonth" value={date.month} onChange={e => {updateDateMonthFunction(e.target)}}>
                 </input>
                 <span>
@@ -18,7 +18,7 @@ function workoutHeader(title, date, time, updateTitleFunction, updateDateMonthFu
                 <input id="workoutHeaderDateYear" value={date.year} onChange={e => {updateDateYearFunction(e.target)}}>
                 </input>
             </span>
-            <span>
+            <span id="timeContainer">
                 <input id="workoutHeaderTimeHr1" value={time.hour1} onChange={e => {updateTimeFunction(e.target, 0)}}>
                 </input>
                 <span>
@@ -203,7 +203,8 @@ class ExerciseContainer extends React.Component{
                 editAmountFunction={this.props.editAmountFunction}
                 editLoadFunction={this.props.editLoadFunction}
                 removeExerciseFunction={this.props.removeExerciseFunction}
-                index={i}></Exercise>
+                index={i}>
+                </Exercise>
         }
         const exercisesFinal = exercises
         return(
@@ -535,7 +536,7 @@ class LogWorkoutPage extends React.Component{
     }
 
     _addSet(exerciseIndex){
-        let previousSet = this.state.workoutContainer.exercises[exerciseIndex].sets[this.state.workoutContainer.exercises[exerciseIndex].sets.length - 1]
+        const previousSet = JSON.parse(JSON.stringify(this.state.workoutContainer.exercises[exerciseIndex].sets[this.state.workoutContainer.exercises[exerciseIndex].sets.length - 1]))
         let newExercises = this.state.workoutContainer.exercises
         newExercises[exerciseIndex].sets.push(previousSet)
         let newWorkoutContainer = this.state.workoutContainer
@@ -561,6 +562,7 @@ class LogWorkoutPage extends React.Component{
     }
 
     _changeAmount(target, exerciseIndex, setIndex){
+        console.log(this.state.workoutContainer.exercises[exerciseIndex].sets[setIndex]);
         let newValue = target.value.trim()
         if (newValue.length == 0 || parseInt(newValue) == 0){
             newValue = "0"
@@ -568,10 +570,8 @@ class LogWorkoutPage extends React.Component{
         newValue = parseInt(newValue).toString()
         if (newValue.length < 5 && !isNaN(newValue)){
             target.style.width = ((newValue.length + 1) * 13) + 'px';
-            let newExercises = this.state.workoutContainer.exercises
-            newExercises[exerciseIndex].sets[setIndex].amount = newValue;
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.exercises = newExercises
+            const newWorkoutContainer = this.state.workoutContainer
+            newWorkoutContainer.exercises[exerciseIndex].sets[setIndex].amount = newValue;
             this.setState({
                 workoutContainer: newWorkoutContainer
             },() =>{
@@ -588,10 +588,8 @@ class LogWorkoutPage extends React.Component{
         newValue = parseInt(newValue).toString()
         if (newValue.length < 5 && !isNaN(newValue)){
             target.style.width = ((newValue.length + 1) * 13) + 'px';
-            let newExercises = this.state.workoutContainer.exercises
-            newExercises[exerciseIndex].sets[setIndex].load = newValue;
-            let newWorkoutContainer = this.state.workoutContainer
-            newWorkoutContainer.exercises = newExercises
+            const newWorkoutContainer = this.state.workoutContainer
+            newWorkoutContainer.exercises[exerciseIndex].sets[setIndex].load = newValue;
             this.setState({
                 workoutContainer: newWorkoutContainer
             },() =>{
@@ -777,35 +775,108 @@ class LogWorkoutPage extends React.Component{
     }
 
     _logWorkout(){
-        console.log("logging workout");
-        firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc().set({
-            title: this.state.workoutContainer.title,
-            date: this.state.workoutContainer.date,
-            time: this.state.workoutContainer.time,
-            exercises: this.state.workoutContainer.exercises
-        }).then(() => {
-            let newWorkoutContainer = {
-                title: "My Workout",
-                date: this._getDate(),
-                time: this._getTime(),
-                exercises: []
-            }
-            console.log("Setting State");
-            this.setState({
-                workoutContainer: newWorkoutContainer
-            }, () => {
-                this._initElements();
-                let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
-                    title: this.state.workoutContainer.title,
-                    date: this.state.workoutContainer.date,
-                    time: this.state.workoutContainer.time,
-                    exercises: this.state.workoutContainer.exercises
+        if (this._checkTimeAndDate()){
+            firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc().set({
+                title: this.state.workoutContainer.title,
+                date: this.state.workoutContainer.date,
+                time: this.state.workoutContainer.time,
+                exercises: this.state.workoutContainer.exercises
+            }).then(() => {
+                let newWorkoutContainer = {
+                    title: "My Workout",
+                    date: this._getDate(),
+                    time: this._getTime(),
+                    exercises: []
+                }
+                this.setState({
+                    workoutContainer: newWorkoutContainer
+                }, () => {
+                    this._initElements();
+                    let ref = firebase.firestore().collection(FB_USERS_COLLECTION_KEY).doc(currUser.getUID()).collection(FB_WORKOUTS_COLLECTION_KEY).doc("logging").set({
+                        title: this.state.workoutContainer.title,
+                        date: this.state.workoutContainer.date,
+                        time: this.state.workoutContainer.time,
+                        exercises: this.state.workoutContainer.exercises
+                    })
                 })
-            })
-        });
+            });
+        }
     }
-    
-    
+
+    _checkTimeAndDate(){
+        let hour1 = this.state.workoutContainer.time.hour1
+        let hour2 = this.state.workoutContainer.time.hour2
+        if (this.state.workoutContainer.time.meridiem1 == "PM"){
+            hour1 = parseInt(hour1) + 12
+        }
+        if (this.state.workoutContainer.time.meridiem2 == "PM"){
+            hour2 = parseInt(hour2) + 12
+        }
+        console.log(hour1);
+        console.log(hour2);
+        if ((hour1 - hour2) > 0){
+            document.getElementById("timeContainer").style.border = "2px solid red"
+            let seconds = 500
+            let opacity = 0.9
+            for (let i = 0; i < 4; i++){
+                let passIn = opacity
+                setTimeout(function(){
+                    this._fadingBorder(passIn, "timeContainer")
+            }.bind(this), seconds)
+                seconds += 500
+                opacity = opacity - 0.2
+            }
+            setTimeout(() =>{
+                document.getElementById("timeContainer").style.borderStyle = "none"
+            }, seconds)
+            return false
+        }
+        if ((hour1 - hour2) == 0){
+            if (this.state.workoutContainer.time.min1 - this.state.workoutContainer.time.min2 >= 0){
+                document.getElementById("timeContainer").style.border = "2px solid red"
+                let seconds = 500
+                let opacity = 0.9
+                for (let i = 0; i < 4; i++){
+                    let passIn = opacity
+                    setTimeout(function(){
+                        this._fadingBorder(passIn, "timeContainer")
+                }.bind(this), seconds)
+                    seconds += 500
+                    opacity = opacity - 0.2
+                }
+                setTimeout(() =>{
+                    document.getElementById("timeContainer").style.borderStyle = "none"
+                }, seconds)
+                return false
+            }
+        }
+        if (parseInt(this.state.workoutContainer.date.day) == 31){
+            if (parseInt(this.state.workoutContainer.date.month) == 9 || parseInt(this.state.workoutContainer.date.month) == 4 || parseInt(this.state.workoutContainer.date.month) == 6 || parseInt(this.state.workoutContainer.date.month) == 11){
+                document.getElementById("dateContainer").style.border = "2px solid red"
+                let seconds = 500
+                let opacity = 0.9
+                for (let i = 0; i < 4; i++){
+                    let passIn = opacity
+                    setTimeout(function(){
+                        this._fadingBorder(passIn, "dateContainer")
+                }.bind(this), seconds)
+                    seconds += 500
+                    opacity = opacity - 0.2
+                }
+                setTimeout(() =>{
+                    document.getElementById("dateContainer").style.borderStyle = "none"
+                }, seconds)
+                return false
+            }
+        }
+        return true
+    }
+
+    _fadingBorder(opacity, id){
+        console.log("5px solid rgba(255, 0, 0, " +  opacity.toString() + ")");
+        document.getElementById(id).style.border = "2px solid rgba(255, 0, 0, " + opacity.toString() + ")"
+    }
+
     render(){
         return(
             <div className="LogWorkoutPage">

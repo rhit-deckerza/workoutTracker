@@ -16,8 +16,8 @@ function weekDay(id, weekDay, date, i){
                 <span class="myLine">
                     
                 </span>
-                <div class="weekdayTime">2 hours</div>
-                <div class="weekdayTime">and 47 minutes</div>
+                <div class="hourDay"></div>
+                <div class="minDay"></div>
                 <div id={calString}></div>
                 <div id={id + "0"} class="weekdayTime"><span class="armBlock"></span> Arms</div>
                 <div id={id + "1"} class="weekdayTime"><span class="coreBlock"></span> Core</div>
@@ -31,6 +31,9 @@ function weekDay(id, weekDay, date, i){
 
 
 function header(username, logOutFunction, imgRef, returnToHomepageFunction){
+    if (username == null || username.length == 0){
+        username = "Username"
+    }
     return (
         <header>
             <div id="title" onClick={() => {returnToHomepageFunction()}}>Workout Tracker</div>
@@ -64,6 +67,9 @@ function info (username, days, hours){
     if (hours == 1) {
         hoursLine = 'hour'
     }
+    if (username == null || username.length == 0){
+        username = "Username"
+    }
     return (
             <div id="info">
                 <p id="infoWelcome">Welcome {username}</p>
@@ -90,12 +96,26 @@ class Cal extends React.Component{
         return day
     }
 
+    checkLeapYear(year) {
+
+        //three conditions to find out the leap year
+        if ((0 == year % 4) && (0 != year % 100) || (0 == year % 400)) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     calDate(index){
         let date = this.d.getDate();
         date = date - index;
         if (date < 1){
             if (this.d.getMonth() == 0 || this.d.getMonth() == 1 || this.d.getMonth() == 3 || this.d.getMonth() == 5 || this.d.getMonth() == 7 || this.d.getMonth() == 8 || this.d.getMonth() == 10){
                 date = date + 31;
+            }else if(this.d.getMonth() == 2 && this.checkLeapYear(this.d.getFullYear)){
+                date = date + 29
+            }else if(this.d.getMonth() == 2){
+                date = date + 28
             }else{
                 date = date + 30;
             }
@@ -121,6 +141,8 @@ class Cal extends React.Component{
             return dateString + 'th'
         }
     }
+
+
     componentDidMount(){
         
         // Load the Visualization API and the corechart package.
@@ -132,10 +154,7 @@ class Cal extends React.Component{
         // Callback that creates and populates a data table,
         // instantiates the pie chart, passes in the data and
         // draws it.
-      }
-  
-
-      
+    }
           
           
       drawChart(){
@@ -145,16 +164,30 @@ class Cal extends React.Component{
             days[i].addColumn('string', 'Type');
             days[i].addColumn('number', 'Count');
         }
-        let dates = [(this.d.getDate() - 6).toString(), (this.d.getDate() - 5).toString(), (this.d.getDate() - 4).toString(), (this.d.getDate() - 3).toString(), (this.d.getDate() - 2).toString(), (this.d.getDate() - 1).toString(), (this.d.getDate()).toString()]
-        
-        console.log(dates);
-        
+        let dates = []
+        let j = 0
+        for (let i = 6; i >= 0; i--){
+            let date = this.d.getDate() - i
+            if (date <= 0){
+                if (this.d.getMonth() == 0 || this.d.getMonth() == 1 || this.d.getMonth() == 3 || this.d.getMonth() == 5 || this.d.getMonth() == 7 || this.d.getMonth() == 8 || this.d.getMonth() == 10){
+                    date = date + 31;
+                }else if(this.d.getMonth() == 2 && this.checkLeapYear(this.d.getFullYear().toString())){
+                    date = date + 29
+                }else if(this.d.getMonth() == 2){
+                    date = date + 28
+                }else{
+                    date = date + 30;
+                }
+            }
+            dates[j] = date.toString()
+            j++;
+        }
+        let hours = [0, 0, 0, 0, 0, 0, 0]
+        let min = [0, 0, 0, 0, 0, 0, 0]
         firebase.firestore()
         .collection(FB_USERS_COLLECTION_KEY)
         .doc(currUser.getUID())
         .collection(FB_WORKOUTS_COLLECTION_KEY)
-        .where("date.year", "==", this.d.getFullYear().toString())
-        .where("date.month", "==", (this.d.getMonth() + 1).toString())
         .where("date.day", "in", dates)
         .get().then((querySnapshot) => {
             let counts = []
@@ -168,43 +201,131 @@ class Cal extends React.Component{
                         arm: 0
                     }
                 }
+            let month1 = (this.d.getMonth() + 1).toString()
+            let month2 = (this.d.getMonth()).toString()
+            if (month2 == "0"){
+                month2 = "12"
+            }
+            let year1 = (this.d.getFullYear()).toString()
+            let year2 = (this.d.getFullYear() - 1).toString()
+            console.log(year1);
+            console.log(year2);
             querySnapshot.forEach((doc) => {
-                switch(doc.data().date.day){
-                    case dates[0]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[0][doc.data().exercises[i].type]++;
+                let hour1 = 0
+                let hour2 = 0
+                if (doc.id != "logging"){
+                    if (doc.data().date.month == month1 || doc.data().date.month == month2){
+                        if (doc.data().date.year == year1 || doc.data().date.year == year2){
+                            switch(doc.data().date.day){
+                                case dates[0]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[0][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[0] += hour2 - hour1
+                                    min[0] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[1]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[1][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[1] += hour2 - hour1
+                                    min[1] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[2]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[2][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[2] += hour2 - hour1
+                                    min[2] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[3]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[3][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[3] += hour2 - hour1
+                                    min[3] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[4]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[4][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[4] += hour2 - hour1
+                                    min[4] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[5]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[5][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[5] += hour2 - hour1
+                                    min[5] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                                case dates[6]:
+                                    for (let i = 0; i < doc.data().exercises.length; i++){
+                                        counts[6][doc.data().exercises[i].type]++;
+                                    }
+                                    hour1 = parseInt(doc.data().time.hour1)
+                                    hour2 = parseInt(doc.data().time.hour2)
+                                    if (doc.data().time.meridiem1 == "PM"){
+                                        hour1 += 12;
+                                    }
+                                    if (doc.data().time.meridiem2 == "PM"){
+                                        hour2 += 12;
+                                    }
+                                    hours[6] += hour2 - hour1
+                                    min[6] += parseInt(doc.data().time.min2) - parseInt(doc.data().time.min1)
+                                    break
+                            }
                         }
-                        break
-                    case dates[1]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[1][doc.data().exercises[i].type]++;
-                        }
-                        break
-                    case dates[2]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[2][doc.data().exercises[i].type]++;
-                        }
-                        break
-                    case dates[3]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[3][doc.data().exercises[i].type]++;
-                        }
-                        break
-                    case dates[4]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[4][doc.data().exercises[i].type]++;
-                        }
-                        break
-                    case dates[5]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[5][doc.data().exercises[i].type]++;
-                        }
-                        break
-                    case dates[6]:
-                        for (let i = 0; i < doc.data().exercises.length; i++){
-                            counts[6][doc.data().exercises[i].type]++;
-                        }
-                        break
+                    }
+                    
                 }
             })
             for (let i = 0; i < 7; i++){
@@ -216,6 +337,30 @@ class Cal extends React.Component{
                     ['back', counts[i].back],
                     ['arm', counts[i].arm]
                   ]);
+
+                if (min[i] > 60){
+                    let amount = Math.floor(min[i] / 60)
+                    hours[i] += amount;
+                    min[i] -= amount*60
+                }
+                if (min[i] != 0){
+                    if (min[i] == 1){
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .minDay").innerHTML = min[i] + " minute"
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .minDay").display = "block"
+                    }else{
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .minDay").innerHTML = min[i] + " minutes"
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .minDay").display = "block"
+                    }
+                }
+                if (hours[i] != 0){
+                    if (hours[i] == 1){
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .hourDay").innerHTML = hours[i] + " hour"
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .hourDay").display = "block"
+                    }else{
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .hourDay").innerHTML = hours[i] + " hours"
+                        document.querySelector("span#" + this.intToWord(i + 1) + "Cal > .hourDay").display = "block"
+                    }
+                }
             }
             var options = {
                 legend: {position:"none"},
@@ -241,8 +386,6 @@ class Cal extends React.Component{
                     var chart = new google.visualization.PieChart(document.getElementById(idString));
                     chart.draw(days[i], options);
                     for (let j = 0; j < 6; j++){
-                        console.log(counts);
-                        console.log(counts[i][groups[j]]);
                         if (parseInt(counts[i][groups[j]]) > 0){
                             let id = this.intToWord(i + 1) + "Cal" + j
                             console.log(id);
@@ -335,7 +478,7 @@ function noteSelection(title, timestamp, key, switchToNote, deleteNote, active){
     return(
         <div className="NoteSelection" key={key} onClick={() => {switchToNote(key)}}>
             <div class={className}>
-                <span>{title}</span>
+                <span class="noteSelectionTitlePog">{title}</span>
                 <span id={"deleteSelection"} onClick={(e) => {e.stopPropagation(); deleteNote(key)}}>X</span>
             </div>
             <div class="NoteSelectionTimestamp">{timestamp}</div>
@@ -589,46 +732,46 @@ class HomePage extends React.Component{
         }
         else {
                 querySnapshot.forEach((doc) => {
-                    let now = new Date()
-                    let rawDay = doc.data().date.day
-                    let rawMonth = doc.data().date.month
-                    let rawYear = doc.data().date.year
-                    let rawHour1 = doc.data().time.hour1
-                    let rawMeridiem1 = doc.data().time.meridiem1
-                    let rawMin1 = doc.data().time.min1
-                    let rawHour2 = doc.data().time.hour2
-                    let rawMeridiem2 = doc.data().time.meridiem2
-                    let rawMin2 = doc.data().time.min2
-                    if (rawDay < 10) {
-                        rawDay = '0' + rawDay
-                    }
-                    if (rawMonth < 10) {
-                        rawMonth = '0' + rawMonth
-                        console.log(rawMonth)
-                    }
-                    //convert start and end times of workout to army time
-                    if (rawHour1 == '12' && rawMeridiem1 == 'AM') {
-                        rawHour1 = '00';
-                    }
-                    if (rawHour2 == '12' && rawMeridiem2 == 'AM') {
-                        rawHour2 = '00';
-                    }
-                    if (rawMeridiem1 == 'PM' && rawHour1 != '12') {
-                        rawHour1 = +rawHour1 + 12;
-                    }
-                    if (rawMeridiem2 == 'PM' && rawHour2 != '12') {
-                        rawHour2 = +rawHour2 + 12;
-                    }
-                    let date = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour1 + ':' + rawMin1 + ':00')
-                    let date2 = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour2 + ':' + rawMin2 + ':00')
-                    console.log(date)
-                    let elapsed = now.getTime() - date.getTime();
-                    elapsed = elapsed / (1000*60*60*24)
-                    if (elapsed <= 7) {
-                        workouts++;
-                    }
-                    if (elapsed <= 30) {
-                        hours += ((date2.getTime() - date.getTime()) / ((1000*60*60)))
+                    if (doc.id != "logging"){
+                        let now = new Date()
+                        let rawDay = doc.data().date.day
+                        let rawMonth = doc.data().date.month
+                        let rawYear = doc.data().date.year
+                        let rawHour1 = doc.data().time.hour1
+                        let rawMeridiem1 = doc.data().time.meridiem1
+                        let rawMin1 = doc.data().time.min1
+                        let rawHour2 = doc.data().time.hour2
+                        let rawMeridiem2 = doc.data().time.meridiem2
+                        let rawMin2 = doc.data().time.min2
+                        if (rawDay < 10) {
+                            rawDay = '0' + rawDay
+                        }
+                        if (rawMonth < 10) {
+                            rawMonth = '0' + rawMonth
+                        }
+                        //convert start and end times of workout to army time
+                        if (rawHour1 == '12' && rawMeridiem1 == 'AM') {
+                            rawHour1 = '00';
+                        }
+                        if (rawHour2 == '12' && rawMeridiem2 == 'AM') {
+                            rawHour2 = '00';
+                        }
+                        if (rawMeridiem1 == 'PM' && rawHour1 != '12') {
+                            rawHour1 = +rawHour1 + 12;
+                        }
+                        if (rawMeridiem2 == 'PM' && rawHour2 != '12') {
+                            rawHour2 = +rawHour2 + 12;
+                        }
+                        let date = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour1 + ':' + rawMin1 + ':00')
+                        let date2 = new Date(rawYear + '-' + rawMonth + '-'+rawDay +'T' + rawHour2 + ':' + rawMin2 + ':00')
+                        let elapsed = now.getTime() - date.getTime();
+                        elapsed = elapsed / (1000*60*60*24)
+                        if (elapsed <= 7) {
+                            workouts++;
+                        }
+                        if (elapsed <= 30) {
+                            hours += ((date2.getTime() - date.getTime()) / ((1000*60*60)))
+                        }
                     }
                 })
                 
@@ -672,6 +815,16 @@ class HomePage extends React.Component{
         }else{
             return (buttons(this.switch.bind(this), "Switch to Calendar", this.switchToLogWorkout))
         }
+    }
+
+    componentDidMount(){
+        document.getElementById("userImg").addEventListener('error', () =>{
+            var image = document.getElementById("userImg");
+            var isLoaded = image.complete && image.naturalHeight !== 0;
+            if (!isLoaded) {
+                image.src = "images/defaultProfile.jpg";
+            }
+        })
     }
 
     render(){

@@ -288,6 +288,14 @@ header > div{
     display: inline;
 }
 
+.hourDay{
+    font-family: 'Work Sans', sans-serif;
+}
+
+.minDay{
+    font-family: 'Work Sans', sans-serif;
+}
+
 #title{
     margin-left: 10px;
     cursor: pointer;
@@ -374,6 +382,7 @@ h1{
     display: inline;
     color: lightgray;
     cursor: pointer;
+    background-color: #B1E1FF;
 }
 
 #deleteSelection:hover{
@@ -408,12 +417,13 @@ h1{
     justify-content: space-between;
 }
 .NoteSelectionTimestamp{
-    font-size: 10pt;
+    font-size: 9pt;
     color: grey;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 
 #addNotesSelection{
     margin-left: auto;
@@ -806,4 +816,8 @@ button{
     background-color: #FFF177;
     width: 12px;
     height: 12px;
+}
+
+.noteSelectionTitlePog{
+    max-width: 150px;
 }

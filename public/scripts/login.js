@@ -22,6 +22,9 @@ let User = class{
     }
 
     getImgRef(){
+        if (this.fbUser.photoURL == null){
+            return "images/defaultProfile.jpg"
+        }
         return this.fbUser.photoURL;
     }
 
