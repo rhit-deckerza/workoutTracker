@@ -548,12 +548,51 @@ button{
     color: white;
     height: 92vh;
 }
-
+#ExerciseArchiveSelector{
+    grid-area: exer;
+    display: grid;
+    grid-template-areas:
+    "type"
+    "select";
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 5fr;
+    background-color: #1A2E40;
+    font-family: 'Work Sans', sans-serif;
+    color: white;
+    height: 92vh;
+}
 #pickAnExercise{
     grid-area: type;
     text-align: center;
     line-height: 80px;
 }
+
+
+#ExerciseArchive{ 
+    grid-area: exer;
+    display: grid;
+    grid-template-areas:
+    "name"
+    "arch";
+    background-color: #B1E1FF;
+    font-family: 'Work Sans', sans-serif;
+    color: white;
+    
+}
+
+#exerciseName {
+    grid-area: name;
+    text-align: center;
+    font-size: 35pt;
+    color: black;
+}
+
+#specificExerciseArchive{
+    grid-area: arch;
+    margin-left: 10px;
+    overflow-y: scroll;
+}
+
 
 #pickAnExercise > span{
     font-size: 35pt;
@@ -571,6 +610,7 @@ button{
 
 #exercisesToPick{
     grid-area: select;
+    margin-left: 10px;
     overflow-y: scroll;
 }
 
@@ -760,7 +800,7 @@ button{
     "nav nav"
     "date exer";
     grid-template-rows: .5fr 9fr;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 2fr 1fr;
     height: 100vh;
 }
 
@@ -769,7 +809,7 @@ button{
     background-color: red;
 }
 
-.ExerciseArchive{
+.ExerciseArchiveSelector{
     grid-area: exer;
     background-color: blue;
 }
